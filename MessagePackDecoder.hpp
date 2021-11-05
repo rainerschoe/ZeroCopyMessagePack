@@ -1,4 +1,5 @@
 #pragma once
+#include <inttypes.h>
 
 template<class T>
 class Maybe
@@ -35,30 +36,21 @@ class MessagePackDecoder
         /// The following functions navigate the message:
         
         /// Returns a new decoder which is seeked to the given map key.
-        MessagePackDecoder operator[](char * f_mapKey)
-        {
-            MessagePackDecoder newDecoder(m_messageBuffer, f_messageSize);
-            newDecoder.seekElementByKey(f_mapKey);
-            return newDecoder;
-        }
+        /// FIXME: cannot overload operator[] as implcit conversion is performed from int literal to char * whcih makes it ambiguous
+        MessagePackDecoder operator[](const char * f_mapKey);
 
         /// Returns a new decoder which is seeked to the given array index.
-        MessagePackDecoder operator[](uint8_t f_index);
-        {
-            MessagePackDecoder newDecoder(m_messageBuffer, f_messageSize);
-            newDecoder.seekElementByKey(f_mapKey);
-            return newDecoder;
-        }
+        MessagePackDecoder accessArray(uint8_t f_index);
 
         /// Resets decoder position to the message root element.
-        bool seekReset()
+        void seekReset()
         {
             m_position = 0;
             m_validSeek = true;
         }
 
         /// Set decoder position to map element with given key.
-        void seekElementByKey(char * f_key);
+        void seekElementByKey(const char * f_key);
 
         /// Set decoder position to array element with given index.
         void seekElementByIndex(uint8_t f_index);
@@ -76,6 +68,9 @@ class MessagePackDecoder
         /// Not yet implemented
         bool getMapKey(uint8_t f_index, char * f_out_mapKey, uint8_t f_maxSize);
         
+        /// Check if current seek position points to valid data
+        bool isValid();
+
         //---------------------------------------------------------------------
 
         //---------------------------------------------------------------------
@@ -124,10 +119,10 @@ class MessagePackDecoder
                 False,
                 String,
                 Nil
-            }
+            };
             uint8_t headerSize;
             uint16_t numPayloadElements;
-            HeaderInfo headerType = InvalidHeader;
+            HeaderType headerType = InvalidHeader;
         };
 
         HeaderInfo decodeHeader();
@@ -136,6 +131,6 @@ class MessagePackDecoder
 
         const uint8_t * m_messageBuffer;
         uint8_t m_messageSize;
-        uint8_t m_position;
-        uint8_t m_validSeek;
+        uint8_t m_position = 0;
+        uint8_t m_validSeek = true;
 };

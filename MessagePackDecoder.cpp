@@ -1,5 +1,18 @@
 #include "MessagePackDecoder.hpp"
 #include <cstring>
+MessagePackDecoder MessagePackDecoder::operator[](const char * f_mapKey)
+{
+    MessagePackDecoder newDecoder = *this;
+    newDecoder.seekElementByKey(f_mapKey);
+    return newDecoder;
+}
+
+MessagePackDecoder MessagePackDecoder::accessArray(uint8_t f_index)
+{
+    MessagePackDecoder newDecoder = *this;
+    newDecoder.seekElementByIndex(f_index);
+    return newDecoder;
+}
 
 void MessagePackDecoder::seekElementByIndex(uint8_t f_index)
 {
@@ -22,14 +35,14 @@ void MessagePackDecoder::seekElementByIndex(uint8_t f_index)
 
     m_position += header.headerSize;
 
-    for(uint16_t elementNumber = 0; elementNumber < f_index, elementNumber++)
+    for(uint16_t elementNumber = 0; elementNumber < f_index; elementNumber++)
     {
         seekNextElement();
     }
     return;
 }
 
-void MessagePackDecoder::seekElementByKey(char * f_key)
+void MessagePackDecoder::seekElementByKey(const char * f_key)
 {
     if(not m_validSeek)
     {
@@ -45,7 +58,7 @@ void MessagePackDecoder::seekElementByKey(char * f_key)
 
     m_position += header.headerSize;
 
-    for(uint16_t elementNumber = 0; elementNumber < header.numPayloadElements, elementNumber++)
+    for(uint16_t elementNumber = 0; elementNumber < header.numPayloadElements; elementNumber++)
     {
         auto maybeKeyMatch = compareString(f_key);
         if(not maybeKeyMatch.isValid())
@@ -116,17 +129,17 @@ MessagePackDecoder::HeaderInfo MessagePackDecoder::decodeHeader()
     newHeaderInfo.numPayloadElements = 0;
 
     // compressed headers:
-    if(typeCode & 0x10 == 0)
+    if((typeCode & 0x80) == 0)
     {
         newHeaderInfo.headerType = HeaderInfo::Uint;
         return newHeaderInfo;
     }
-    if(typeCode & 0xe0 == 0xe0)
+    if((typeCode & 0xe0) == 0xe0)
     {
         newHeaderInfo.headerType = HeaderInfo::Int;
         return newHeaderInfo;
     }
-    if(typeCode & 0xc0 == 0xa0)
+    if((typeCode & 0xe0) == 0xa0)
     {
         newHeaderInfo.headerType = HeaderInfo::String;
         newHeaderInfo.numPayloadElements = typeCode & 0x1f;
@@ -202,7 +215,7 @@ MessagePackDecoder::HeaderInfo MessagePackDecoder::decodeHeader()
             newHeaderInfo.headerSize = 3;
             newHeaderInfo.numPayloadElements = (m_messageBuffer[1] << 8) | m_messageBuffer[2];
             return newHeaderInfo;
-        case 0xdc:
+        case 0xde:
             if(m_messageSize - m_position < 3)
             {
                 return newHeaderInfo;
@@ -217,13 +230,13 @@ MessagePackDecoder::HeaderInfo MessagePackDecoder::decodeHeader()
 }
 
 
-Maybe<uint32_t> MessagePackDecoder::getUint32();
+Maybe<uint32_t> MessagePackDecoder::getUint32()
 {
     HeaderInfo header = decodeHeader();
     if(
             header.headerType != HeaderInfo::Uint
             or
-            m_position + header.headerSize + header.numPayloadElements >= m_messageSize
+            m_position + header.headerSize + header.numPayloadElements > m_messageSize
       )
     {
         // type mismatch
@@ -232,7 +245,7 @@ Maybe<uint32_t> MessagePackDecoder::getUint32();
     switch(header.numPayloadElements)
     {
         case 0:
-            return Maybe<uint32_t>(m_messageBuffer[0] & 0x07);
+            return Maybe<uint32_t>(m_messageBuffer[0] & 0x7f);
         case 1:
             return Maybe<uint32_t>(m_messageBuffer[1]);
         case 2:
@@ -277,7 +290,7 @@ Maybe<uint16_t> MessagePackDecoder::getString(char * f_out_data, uint8_t f_maxSi
     {
         return Maybe<uint16_t>();
     }
-    auto numBytes = getBinary(f_out_data, f_maxSize - 1);
+    auto numBytes = getBinary(reinterpret_cast<uint8_t*>(f_out_data), f_maxSize - 1);
     if(numBytes.isValid())
     {
         f_out_data[numBytes.get()] = '\0';
@@ -295,15 +308,27 @@ Maybe<bool> MessagePackDecoder::compareString(const char * f_string)
     if(
             header.headerType != HeaderInfo::String
             or
-            m_position + header.headerSize + header.numPayloadElements >= m_messageSize
+            m_position + header.headerSize + header.numPayloadElements > m_messageSize
       )
     {
         // type mismatch
         return Maybe<bool>();
     }
 
-    int cmpResult = std::strncmp(f_string, &m_messageBuffer[m_position + header.headerSize], header.numPayloadElements);
-    return Maybe<bool>(cmpResult == 0);
+    const char * message = reinterpret_cast<const char*>(&m_messageBuffer[m_position + header.headerSize]);
+    size_t i = 0;
+    for(; i < header.numPayloadElements; i++)
+    {
+        if(f_string[i] == '\0' or message[i] != f_string[i])
+        {
+            return Maybe<bool>(false);
+        }
+    }
+    if(f_string[i] != '\0')
+    {
+        return Maybe<bool>(false);
+    }
+    return Maybe<bool>(true);
 }
 
 Maybe<uint16_t> MessagePackDecoder::getBinary(uint8_t * f_out_data, uint8_t f_maxSize)
@@ -312,15 +337,26 @@ Maybe<uint16_t> MessagePackDecoder::getBinary(uint8_t * f_out_data, uint8_t f_ma
     if(
             header.headerType != HeaderInfo::String
             or
-            m_position + header.headerSize + header.numPayloadElements >= m_messageSize
+            m_position + header.headerSize + header.numPayloadElements > m_messageSize
             or
-            header.numPayloadElements > f_maxSize;
+            header.numPayloadElements > f_maxSize
       )
     {
         // type mismatch
         return Maybe<uint16_t>();
     }
 
-    memcpy(f_out_data, &m_messageBuffer[m_position header.headerSize], header.numPayloadElements);
+    memcpy(f_out_data, &m_messageBuffer[m_position + header.headerSize], header.numPayloadElements);
     return Maybe<uint16_t>(header.numPayloadElements);
+}
+
+
+bool MessagePackDecoder::isValid()
+{
+    auto header = decodeHeader();
+    if(header.headerType == HeaderInfo::InvalidHeader)
+    {
+        m_validSeek = false;
+    }
+    return m_validSeek;
 }
