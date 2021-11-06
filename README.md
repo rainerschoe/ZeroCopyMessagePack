@@ -17,20 +17,26 @@ uint8_t message[32];
 
 MessagePackEncoder encoder(message, sizeof(message));
 
-encoder.addMap(3);
+bool encodeResult = true;
 
-encoder.addString("hello");
-encoder.addString("world");
+encodeResult &= encoder.addMap(3);
 
-encoder.addString("answer");
-encoder.addUint(42);
+encodeResult &= encoder.addString("hello");
+encodeResult &= encoder.addString("world");
 
-encoder.addString("list");
-encoder.addArray(2);
-encoder.addBool(true);
-encoder.addBool(false);
+encodeResult &= encoder.addString("answer");
+encodeResult &= encoder.addUint(42);
+
+encodeResult &= encoder.addString("list");
+encodeResult &= encoder.addArray(2);
+encodeResult &= encoder.addBool(true);
+encodeResult &= encoder.addBool(false);
 
 size_t messageSize = encoder.getMessageSize();
+if(encodeResult)
+{
+    std::cout << "Encode succeeded. MessageSize = " << messageSize;
+}
 ```
 
 Decoding:
