@@ -1,10 +1,10 @@
 # ZeroCopyMessagePack
 
-This is a very lightweight implementation for the MessagePack data format.
+This is a very lightweight C++ implementation for the MessagePack data format.
 
-It provides an encoder as well as an decoder.
+It provides an encoder as well as a decoder.
 
-This library is mostly intended to embedded and resource constrained devices:
+This library is intended for embedded and resource constrained devices:
 
 - Ram usage is minimized, as decoding is done on the fly without copying any data.
 - No Heap is used
@@ -43,6 +43,13 @@ if(stringLength.isValid())
 {
     // Decoding succeeded
     std::cout << "hello: " << str << " length = " stringLength.get(); 
+}
+
+auto answer = decoder["answer"].getUint8();
+if(answer.isValid())
+{
+    // Decoding succeeded
+    std::cout << "answer: " << answer.get(); 
 }
 
 auto booleanValue = decoder["list"].accessArray(0).getBool();
