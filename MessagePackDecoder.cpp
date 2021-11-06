@@ -1,13 +1,13 @@
 #include "MessagePackDecoder.hpp"
 #include <cstring>
-MessagePackDecoder MessagePackDecoder::operator[](const char * f_mapKey)
+MessagePackDecoder MessagePackDecoder::operator[](const char * f_mapKey) const
 {
     MessagePackDecoder newDecoder = *this;
     newDecoder.seekElementByKey(f_mapKey);
     return newDecoder;
 }
 
-MessagePackDecoder MessagePackDecoder::accessArray(uint8_t f_index)
+MessagePackDecoder MessagePackDecoder::accessArray(uint8_t f_index) const
 {
     MessagePackDecoder newDecoder = *this;
     newDecoder.seekElementByIndex(f_index);
@@ -118,7 +118,7 @@ void MessagePackDecoder::seekNextElement()
 }
 
 
-MessagePackDecoder::HeaderInfo MessagePackDecoder::decodeHeader()
+MessagePackDecoder::HeaderInfo MessagePackDecoder::decodeHeader() const
 {
     HeaderInfo newHeaderInfo;
     if(m_position >= m_messageSize)
@@ -232,7 +232,43 @@ MessagePackDecoder::HeaderInfo MessagePackDecoder::decodeHeader()
 }
 
 
-Maybe<uint32_t> MessagePackDecoder::getUint32()
+Maybe<bool> MessagePackDecoder::isNil() const
+{
+    HeaderInfo header = decodeHeader();
+    if(header.headerType == HeaderInfo::Nil)
+    {
+        return Maybe<bool>(true);
+    }
+    else if(header.headerType != HeaderInfo::InvalidHeader)
+    {
+        return Maybe<bool>(false);
+    }
+    else
+    {
+        // decode failure
+        return Maybe<bool>();
+    }
+}
+
+Maybe<bool> MessagePackDecoder::getBool() const
+{
+    HeaderInfo header = decodeHeader();
+    if(header.headerType == HeaderInfo::True)
+    {
+        return Maybe<bool>(true);
+    }
+    else if(header.headerType == HeaderInfo::False)
+    {
+        return Maybe<bool>(false);
+    }
+    else
+    {
+        // type mismatch
+        return Maybe<bool>();
+    }
+}
+
+Maybe<uint32_t> MessagePackDecoder::getUint32() const
 {
     HeaderInfo header = decodeHeader();
     if(
@@ -260,7 +296,7 @@ Maybe<uint32_t> MessagePackDecoder::getUint32()
     }
 }
 
-Maybe<uint8_t> MessagePackDecoder::getUint8()
+Maybe<uint8_t> MessagePackDecoder::getUint8() const
 {
     auto u32val = getUint32();
     if((not u32val.isValid()) or u32val.get() > 0xff)
@@ -273,7 +309,7 @@ Maybe<uint8_t> MessagePackDecoder::getUint8()
     }
 }
 
-Maybe<uint16_t> MessagePackDecoder::getUint16()
+Maybe<uint16_t> MessagePackDecoder::getUint16() const
 {
     auto u32val = getUint32();
     if((not u32val.isValid()) or u32val.get() > 0xffff)
@@ -286,7 +322,7 @@ Maybe<uint16_t> MessagePackDecoder::getUint16()
     }
 }
 
-Maybe<uint16_t> MessagePackDecoder::getString(char * f_out_data, uint8_t f_maxSize)
+Maybe<uint16_t> MessagePackDecoder::getString(char * f_out_data, uint8_t f_maxSize) const
 {
     if(f_maxSize < 1)
     {
@@ -304,7 +340,7 @@ Maybe<uint16_t> MessagePackDecoder::getString(char * f_out_data, uint8_t f_maxSi
     return numBytes;
 }
 
-Maybe<bool> MessagePackDecoder::compareString(const char * f_string)
+Maybe<bool> MessagePackDecoder::compareString(const char * f_string) const
 {
     HeaderInfo header = decodeHeader();
     if(
@@ -333,7 +369,7 @@ Maybe<bool> MessagePackDecoder::compareString(const char * f_string)
     return Maybe<bool>(true);
 }
 
-Maybe<uint16_t> MessagePackDecoder::getBinary(uint8_t * f_out_data, uint8_t f_maxSize)
+Maybe<uint16_t> MessagePackDecoder::getBinary(uint8_t * f_out_data, uint8_t f_maxSize) const
 {
     HeaderInfo header = decodeHeader();
     if(

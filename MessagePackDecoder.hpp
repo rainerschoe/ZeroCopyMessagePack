@@ -36,11 +36,11 @@ class MessagePackDecoder
         /// The following functions navigate the message:
         
         /// Returns a new decoder which is seeked to the given map key.
-        /// FIXME: cannot overload operator[] as implcit conversion is performed from int literal to char * whcih makes it ambiguous
-        MessagePackDecoder operator[](const char * f_mapKey);
+        /// FIXME: cannot overload operator[] as implicit conversion is performed from int literal to char * whcih makes it ambiguous
+        MessagePackDecoder operator[](const char * f_mapKey) const;
 
         /// Returns a new decoder which is seeked to the given array index.
-        MessagePackDecoder accessArray(uint8_t f_index);
+        MessagePackDecoder accessArray(uint8_t f_index) const;
 
         /// Resets decoder position to the message root element.
         void seekReset()
@@ -60,13 +60,13 @@ class MessagePackDecoder
         /// The following functions inspect data types:
 
         /// Not yet implemented
-        Maybe<uint8_t> getArraySize();
+        Maybe<uint8_t> getArraySize() const;
 
         /// Not yet implemented
-        Maybe<uint8_t> getMapSize();
+        Maybe<uint8_t> getMapSize() const;
 
         /// Not yet implemented
-        bool getMapKey(uint8_t f_index, char * f_out_mapKey, uint8_t f_maxSize);
+        bool getMapKey(uint8_t f_index, char * f_out_mapKey, uint8_t f_maxSize) const;
         
         /// Check if current seek position points to valid data
         bool isValid();
@@ -76,33 +76,41 @@ class MessagePackDecoder
         //---------------------------------------------------------------------
         /// The following functions access data members:
 
+        /// Decodes current element as a bool.
+        /// @returns the boolean value if decoding was successful
+        Maybe<bool> getBool() const;
+
+        /// Checks if current element is set to "Nil"
+        /// @returns true/false if decoding was successful
+        Maybe<bool> isNil() const;
+
         /// Decodes current element as an uint32_t.
         /// @returns the integer if decoding was successful
-        Maybe<uint32_t> getUint32();
+        Maybe<uint32_t> getUint32() const;
 
         /// Decodes current element as an uint8_t.
         /// @returns the integer if decoding was successful
-        Maybe<uint8_t> getUint8();
+        Maybe<uint8_t> getUint8() const;
 
         /// Decodes current element as an uint16_t.
         /// @returns the integer if decoding was successful
-        Maybe<uint16_t> getUint16();
+        Maybe<uint16_t> getUint16() const;
 
         /// Reads a String from the MessagePack at current seek position.
         /// @param f_out_data buffer to which read string is written. Terminating '\0' is always added
         /// @returns length of the read string if read was successful
-        Maybe<uint16_t> getString(char * f_out_data, uint8_t f_maxSize);
+        Maybe<uint16_t> getString(char * f_out_data, uint8_t f_maxSize) const;
 
         /// Compares the string from the MessagePack at current seek position with given string.
         /// @param f_string null terminated string to compare
         /// @returns true if strings match, false if strings do not match,
         ///          invalid if string could not be decoded
-        Maybe<bool> compareString(const char * f_string);
+        Maybe<bool> compareString(const char * f_string) const;
 
         /// Reads a Byte buffer from the MessagePack at current seek position.
         /// @param f_out_data buffer to which data is written.
         /// @returns number of bytes read if read was successful
-        Maybe<uint16_t> getBinary(uint8_t * f_out_data, uint8_t f_maxSize);
+        Maybe<uint16_t> getBinary(uint8_t * f_out_data, uint8_t f_maxSize) const;
         //---------------------------------------------------------------------
 
     private:
@@ -125,7 +133,7 @@ class MessagePackDecoder
             HeaderType headerType = InvalidHeader;
         };
 
-        HeaderInfo decodeHeader();
+        HeaderInfo decodeHeader() const;
 
         void seekNextElement();
 

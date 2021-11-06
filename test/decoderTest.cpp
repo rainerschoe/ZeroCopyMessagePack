@@ -28,6 +28,107 @@ TEST_CASE( "EmptyMessageBuffer", "" ) {
     REQUIRE(res.isValid() == false);
 }
 
+TEST_CASE( "Nil", "" ) {
+    std::vector<uint8_t> message{{0xc0}};
+
+    MessagePackDecoder decoder(message.data(), message.size());
+
+    auto u8 = decoder.getUint8();
+    REQUIRE(u8.isValid() == false);
+
+    auto u16 = decoder.getUint16();
+    REQUIRE(u16.isValid() == false);
+
+    auto u32 = decoder.getUint32();
+    REQUIRE(u32.isValid() == false);
+
+    char str[16];
+    auto len = decoder.getString(str, sizeof(str));
+    REQUIRE(len.isValid() == false);
+
+    uint8_t bin[16];
+    auto len2 = decoder.getBinary(bin, sizeof(bin));
+    REQUIRE(len2.isValid() == false);
+
+    auto res = decoder.compareString("hello");
+    REQUIRE(res.isValid() == false);
+
+    auto boolean = decoder.getBool();
+    REQUIRE(boolean.isValid() == false);
+
+    auto nil = decoder.isNil();
+    REQUIRE(nil.isValid() == true);
+    REQUIRE(nil.get() == true);
+}
+
+TEST_CASE( "Bool_true", "" ) {
+    std::vector<uint8_t> message{{0xc3}};
+
+    MessagePackDecoder decoder(message.data(), message.size());
+
+    auto u8 = decoder.getUint8();
+    REQUIRE(u8.isValid() == false);
+
+    auto u16 = decoder.getUint16();
+    REQUIRE(u16.isValid() == false);
+
+    auto u32 = decoder.getUint32();
+    REQUIRE(u32.isValid() == false);
+
+    char str[16];
+    auto len = decoder.getString(str, sizeof(str));
+    REQUIRE(len.isValid() == false);
+
+    uint8_t bin[16];
+    auto len2 = decoder.getBinary(bin, sizeof(bin));
+    REQUIRE(len2.isValid() == false);
+
+    auto res = decoder.compareString("hello");
+    REQUIRE(res.isValid() == false);
+
+    auto boolean = decoder.getBool();
+    REQUIRE(boolean.isValid() == true);
+    REQUIRE(boolean.get() == true);
+
+    auto nil = decoder.isNil();
+    REQUIRE(nil.isValid() == true);
+    REQUIRE(nil.get() == false);
+}
+
+TEST_CASE( "Bool_false", "" ) {
+    std::vector<uint8_t> message{{0xc2}};
+
+    MessagePackDecoder decoder(message.data(), message.size());
+
+    auto u8 = decoder.getUint8();
+    REQUIRE(u8.isValid() == false);
+
+    auto u16 = decoder.getUint16();
+    REQUIRE(u16.isValid() == false);
+
+    auto u32 = decoder.getUint32();
+    REQUIRE(u32.isValid() == false);
+
+    char str[16];
+    auto len = decoder.getString(str, sizeof(str));
+    REQUIRE(len.isValid() == false);
+
+    uint8_t bin[16];
+    auto len2 = decoder.getBinary(bin, sizeof(bin));
+    REQUIRE(len2.isValid() == false);
+
+    auto res = decoder.compareString("hello");
+    REQUIRE(res.isValid() == false);
+
+    auto boolean = decoder.getBool();
+    REQUIRE(boolean.isValid() == true);
+    REQUIRE(boolean.get() == false);
+
+    auto nil = decoder.isNil();
+    REQUIRE(nil.isValid() == true);
+    REQUIRE(nil.get() == false);
+}
+
 //    - "00"                          # 0 ... 127
 TEST_CASE( "Number_0_u7", "" ) {
     std::vector<uint8_t> message{{0x00}};
