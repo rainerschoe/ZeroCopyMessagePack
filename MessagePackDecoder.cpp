@@ -83,7 +83,6 @@ void MessagePackDecoder::seekElementByKey(const char * f_key)
     m_validSeek = false;
     return;
 }
-
 void MessagePackDecoder::seekNextElement()
 {
     HeaderInfo header = decodeHeader();
@@ -96,15 +95,18 @@ void MessagePackDecoder::seekNextElement()
             m_position += header.headerSize;
             for(uint16_t elementNumber = 0; elementNumber < header.numPayloadElements; elementNumber++)
             {
+                uint32_t startpos = m_position;
                 seekNextElement();
                 seekNextElement();
             }
+            return;
         case HeaderInfo::Array:
             m_position += header.headerSize;
             for(uint16_t elementNumber = 0; elementNumber < header.numPayloadElements; elementNumber++)
             {
                 seekNextElement();
             }
+            return;
         default:
             m_position += header.headerSize + header.numPayloadElements;
     }
@@ -204,7 +206,7 @@ MessagePackDecoder::HeaderInfo MessagePackDecoder::decodeHeader()
             }
             newHeaderInfo.headerType = HeaderInfo::String;
             newHeaderInfo.headerSize = 2;
-            newHeaderInfo.numPayloadElements = m_messageBuffer[1];
+            newHeaderInfo.numPayloadElements = m_messageBuffer[m_position + 1];
             return newHeaderInfo;
         case 0xdc:
             if(m_messageSize - m_position < 3)
@@ -213,7 +215,7 @@ MessagePackDecoder::HeaderInfo MessagePackDecoder::decodeHeader()
             }
             newHeaderInfo.headerType = HeaderInfo::Array;
             newHeaderInfo.headerSize = 3;
-            newHeaderInfo.numPayloadElements = (m_messageBuffer[1] << 8) | m_messageBuffer[2];
+            newHeaderInfo.numPayloadElements = (m_messageBuffer[m_position + 1] << 8) | m_messageBuffer[m_position + 2];
             return newHeaderInfo;
         case 0xde:
             if(m_messageSize - m_position < 3)
@@ -222,7 +224,7 @@ MessagePackDecoder::HeaderInfo MessagePackDecoder::decodeHeader()
             }
             newHeaderInfo.headerType = HeaderInfo::Map;
             newHeaderInfo.headerSize = 3;
-            newHeaderInfo.numPayloadElements = (m_messageBuffer[1] << 8) | m_messageBuffer[2];
+            newHeaderInfo.numPayloadElements = (m_messageBuffer[m_position + 1] << 8) | m_messageBuffer[m_position + 2];
             return newHeaderInfo;
     }
 
@@ -245,13 +247,13 @@ Maybe<uint32_t> MessagePackDecoder::getUint32()
     switch(header.numPayloadElements)
     {
         case 0:
-            return Maybe<uint32_t>(m_messageBuffer[0] & 0x7f);
+            return Maybe<uint32_t>(m_messageBuffer[m_position] & 0x7f);
         case 1:
-            return Maybe<uint32_t>(m_messageBuffer[1]);
+            return Maybe<uint32_t>(m_messageBuffer[m_position + 1]);
         case 2:
-            return Maybe<uint32_t>(m_messageBuffer[1] << 8 | m_messageBuffer[2]);
+            return Maybe<uint32_t>(m_messageBuffer[m_position + 1] << 8 | m_messageBuffer[m_position + 2]);
         case 4:
-            return Maybe<uint32_t>(m_messageBuffer[1] << 24 | m_messageBuffer[2] << 16 | m_messageBuffer[3] << 8 | m_messageBuffer[4]);
+            return Maybe<uint32_t>(m_messageBuffer[m_position + 1] << 24 | m_messageBuffer[m_position + 2] << 16 | m_messageBuffer[m_position + 3] << 8 | m_messageBuffer[m_position + 4]);
         default:
             // number too big
             return Maybe<uint32_t>();

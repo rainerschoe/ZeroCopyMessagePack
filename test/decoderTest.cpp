@@ -873,5 +873,559 @@ TEST_CASE( "Map_Mini_small", "" ) {
     REQUIRE(std::string(mapStr) == "A");
 }
 
+TEST_CASE( "Map_Mini_3Entries", "" ) {
+    std::vector<uint8_t> message{{
+            0x83,
+            0xa1, 'a', 0xa1, 'A',
+            0xa2, 'g', 'H', 0xa3, 'h', 'e', 'l',
+            0xa3, 's', 'd', 'f', 0xcc, 42
+        }};
 
+    MessagePackDecoder decoder(message.data(), message.size());
 
+    auto u8 = decoder.getUint8();
+    REQUIRE(u8.isValid() == false);
+
+    auto u16 = decoder.getUint16();
+    REQUIRE(u16.isValid() == false);
+
+    auto u32 = decoder.getUint32();
+    REQUIRE(u32.isValid() == false);
+
+    char str[16];
+    auto len = decoder.getString(str, sizeof(str));
+    REQUIRE(len.isValid() == false);
+
+    uint8_t bin[16];
+    auto len2 = decoder.getBinary(bin, sizeof(bin));
+    REQUIRE(len2.isValid() == false);
+
+    auto res = decoder.compareString("hello");
+    REQUIRE(res.isValid() == false);
+
+    REQUIRE(decoder["asd"].isValid() == false);
+    REQUIRE(decoder.accessArray(0).isValid() == false);
+    REQUIRE(decoder[""].isValid() == false);
+    REQUIRE(decoder["a"].isValid() == true);
+    REQUIRE(decoder["g"].isValid() == false);
+    REQUIRE(decoder["gHa"].isValid() == false);
+    REQUIRE(decoder["gH"].isValid() == true);
+    REQUIRE(decoder["sdf"].isValid() == true);
+
+    {
+    char mapStr[5];
+    auto strlen = decoder["a"].getString(mapStr, sizeof(mapStr));
+    REQUIRE(strlen.isValid() == true);
+    REQUIRE(strlen.get() == 1);
+    REQUIRE(std::string(mapStr) == "A");
+    }
+    {
+    char mapStr[5];
+    auto strlen = decoder["gH"].getString(mapStr, sizeof(mapStr));
+    REQUIRE(strlen.isValid() == true);
+    REQUIRE(strlen.get() == 3);
+    REQUIRE(std::string(mapStr) == "hel");
+    }
+    {
+    auto i = decoder["sdf"].getUint8();
+    REQUIRE(i.isValid() == true);
+    REQUIRE(i.get() == 42);
+    }
+
+    REQUIRE(decoder.isValid() == true);
+}
+
+// ----------------------------------------------------------------------------
+
+TEST_CASE( "Map_Big_4Entries", "" ) {
+    std::vector<uint8_t> message{{
+            0xde, 0, 4,
+            0xa1, 'a', 0xa1, 'A',
+            0xa4, 's', 'd', 'f', 'g', 0x07,
+            0xa2, 'g', 'H', 0xa3, 'h', 'e', 'l',
+            0xa3, 's', 'd', 'f', 0xcc, 42
+        }};
+
+    MessagePackDecoder decoder(message.data(), message.size());
+
+    auto u8 = decoder.getUint8();
+    REQUIRE(u8.isValid() == false);
+
+    auto u16 = decoder.getUint16();
+    REQUIRE(u16.isValid() == false);
+
+    auto u32 = decoder.getUint32();
+    REQUIRE(u32.isValid() == false);
+
+    char str[16];
+    auto len = decoder.getString(str, sizeof(str));
+    REQUIRE(len.isValid() == false);
+
+    uint8_t bin[16];
+    auto len2 = decoder.getBinary(bin, sizeof(bin));
+    REQUIRE(len2.isValid() == false);
+
+    auto res = decoder.compareString("hello");
+    REQUIRE(res.isValid() == false);
+
+    REQUIRE(decoder["asd"].isValid() == false);
+    REQUIRE(decoder.accessArray(0).isValid() == false);
+    REQUIRE(decoder[""].isValid() == false);
+    REQUIRE(decoder["a"].isValid() == true);
+    REQUIRE(decoder["g"].isValid() == false);
+    REQUIRE(decoder["gHa"].isValid() == false);
+    REQUIRE(decoder["gH"].isValid() == true);
+    REQUIRE(decoder["sdf"].isValid() == true);
+    REQUIRE(decoder["sdfg"].isValid() == true);
+
+    {
+    char mapStr[5];
+    auto strlen = decoder["a"].getString(mapStr, sizeof(mapStr));
+    REQUIRE(strlen.isValid() == true);
+    REQUIRE(strlen.get() == 1);
+    REQUIRE(std::string(mapStr) == "A");
+    }
+    {
+    char mapStr[5];
+    auto strlen = decoder["gH"].getString(mapStr, sizeof(mapStr));
+    REQUIRE(strlen.isValid() == true);
+    REQUIRE(strlen.get() == 3);
+    REQUIRE(std::string(mapStr) == "hel");
+    }
+    {
+    auto i = decoder["sdf"].getUint8();
+    REQUIRE(i.isValid() == true);
+    REQUIRE(i.get() == 42);
+    }
+    {
+    auto i = decoder["sdfg"].getUint8();
+    REQUIRE(i.isValid() == true);
+    REQUIRE(i.get() == 7);
+    }
+
+    REQUIRE(decoder.isValid() == true);
+}
+
+TEST_CASE( "Array_small_empty", "" ) {
+    std::vector<uint8_t> message{{
+            0x90
+        }};
+
+    MessagePackDecoder decoder(message.data(), message.size());
+
+    auto u8 = decoder.getUint8();
+    REQUIRE(u8.isValid() == false);
+
+    auto u16 = decoder.getUint16();
+    REQUIRE(u16.isValid() == false);
+
+    auto u32 = decoder.getUint32();
+    REQUIRE(u32.isValid() == false);
+
+    char str[16];
+    auto len = decoder.getString(str, sizeof(str));
+    REQUIRE(len.isValid() == false);
+
+    uint8_t bin[16];
+    auto len2 = decoder.getBinary(bin, sizeof(bin));
+    REQUIRE(len2.isValid() == false);
+
+    auto res = decoder.compareString("hello");
+    REQUIRE(res.isValid() == false);
+
+    REQUIRE(decoder["asd"].isValid() == false);
+    REQUIRE(decoder.accessArray(0).isValid() == false);
+    REQUIRE(decoder.accessArray(1).isValid() == false);
+
+    {
+    auto i = decoder.accessArray(0).getUint8();
+    REQUIRE(i.isValid() == false);
+    }
+    {
+    auto i = decoder.accessArray(1).getUint8();
+    REQUIRE(i.isValid() == false);
+    }
+
+    REQUIRE(decoder.isValid() == true);
+}
+
+TEST_CASE( "Array_small_one", "" ) {
+    std::vector<uint8_t> message{{
+            0x91, 0x01,
+        }};
+
+    MessagePackDecoder decoder(message.data(), message.size());
+
+    auto u8 = decoder.getUint8();
+    REQUIRE(u8.isValid() == false);
+
+    auto u16 = decoder.getUint16();
+    REQUIRE(u16.isValid() == false);
+
+    auto u32 = decoder.getUint32();
+    REQUIRE(u32.isValid() == false);
+
+    char str[16];
+    auto len = decoder.getString(str, sizeof(str));
+    REQUIRE(len.isValid() == false);
+
+    uint8_t bin[16];
+    auto len2 = decoder.getBinary(bin, sizeof(bin));
+    REQUIRE(len2.isValid() == false);
+
+    auto res = decoder.compareString("hello");
+    REQUIRE(res.isValid() == false);
+
+    REQUIRE(decoder["asd"].isValid() == false);
+    REQUIRE(decoder.accessArray(0).isValid() == true);
+    REQUIRE(decoder.accessArray(1).isValid() == false);
+
+    {
+    auto i = decoder.accessArray(0).getUint8();
+    REQUIRE(i.isValid() == true);
+    REQUIRE(i.get() == 1);
+    }
+    {
+    auto i = decoder.accessArray(1).getUint8();
+    REQUIRE(i.isValid() == false);
+    }
+
+    REQUIRE(decoder.isValid() == true);
+}
+
+TEST_CASE( "Array_small_three", "" ) {
+    std::vector<uint8_t> message{{
+            0x93,
+            0x01,
+            0xa4, 's', 'd', 'f', 'g',
+            0xa3, 'h', 'e', 'l'
+        }};
+
+    MessagePackDecoder decoder(message.data(), message.size());
+
+    auto u8 = decoder.getUint8();
+    REQUIRE(u8.isValid() == false);
+
+    auto u16 = decoder.getUint16();
+    REQUIRE(u16.isValid() == false);
+
+    auto u32 = decoder.getUint32();
+    REQUIRE(u32.isValid() == false);
+
+    char str[16];
+    auto len = decoder.getString(str, sizeof(str));
+    REQUIRE(len.isValid() == false);
+
+    uint8_t bin[16];
+    auto len2 = decoder.getBinary(bin, sizeof(bin));
+    REQUIRE(len2.isValid() == false);
+
+    auto res = decoder.compareString("hello");
+    REQUIRE(res.isValid() == false);
+
+    REQUIRE(decoder["asd"].isValid() == false);
+    REQUIRE(decoder.accessArray(0).isValid() == true);
+    REQUIRE(decoder.accessArray(1).isValid() == true);
+    REQUIRE(decoder.accessArray(2).isValid() == true);
+    REQUIRE(decoder.accessArray(3).isValid() == false);
+
+    {
+    auto i = decoder.accessArray(0).getUint8();
+    REQUIRE(i.isValid() == true);
+    REQUIRE(i.get() == 1);
+    }
+    {
+    char mapStr[5];
+    auto strlen = decoder.accessArray(1).getString(mapStr, sizeof(mapStr));
+    REQUIRE(strlen.isValid() == true);
+    REQUIRE(strlen.get() == 4);
+    REQUIRE(std::string(mapStr) == "sdfg");
+    }
+    {
+    char mapStr[5];
+    auto strlen = decoder.accessArray(2).getString(mapStr, sizeof(mapStr));
+    REQUIRE(strlen.isValid() == true);
+    REQUIRE(strlen.get() == 3);
+    REQUIRE(std::string(mapStr) == "hel");
+    }
+
+    REQUIRE(decoder.isValid() == true);
+}
+
+TEST_CASE( "Array_big_three", "" ) {
+    std::vector<uint8_t> message{{
+            0xdc, 0x00, 0x03,
+            0x01,
+            0xa4, 's', 'd', 'f', 'g',
+            0xa3, 'h', 'e', 'l'
+        }};
+
+    MessagePackDecoder decoder(message.data(), message.size());
+
+    auto u8 = decoder.getUint8();
+    REQUIRE(u8.isValid() == false);
+
+    auto u16 = decoder.getUint16();
+    REQUIRE(u16.isValid() == false);
+
+    auto u32 = decoder.getUint32();
+    REQUIRE(u32.isValid() == false);
+
+    char str[16];
+    auto len = decoder.getString(str, sizeof(str));
+    REQUIRE(len.isValid() == false);
+
+    uint8_t bin[16];
+    auto len2 = decoder.getBinary(bin, sizeof(bin));
+    REQUIRE(len2.isValid() == false);
+
+    auto res = decoder.compareString("hello");
+    REQUIRE(res.isValid() == false);
+
+    REQUIRE(decoder["asd"].isValid() == false);
+    REQUIRE(decoder.accessArray(0).isValid() == true);
+    REQUIRE(decoder.accessArray(1).isValid() == true);
+    REQUIRE(decoder.accessArray(2).isValid() == true);
+    REQUIRE(decoder.accessArray(3).isValid() == false);
+
+    {
+    auto i = decoder.accessArray(0).getUint8();
+    REQUIRE(i.isValid() == true);
+    REQUIRE(i.get() == 1);
+    }
+    {
+    char mapStr[5];
+    auto strlen = decoder.accessArray(1).getString(mapStr, sizeof(mapStr));
+    REQUIRE(strlen.isValid() == true);
+    REQUIRE(strlen.get() == 4);
+    REQUIRE(std::string(mapStr) == "sdfg");
+    }
+    {
+    char mapStr[5];
+    auto strlen = decoder.accessArray(2).getString(mapStr, sizeof(mapStr));
+    REQUIRE(strlen.isValid() == true);
+    REQUIRE(strlen.get() == 3);
+    REQUIRE(std::string(mapStr) == "hel");
+    }
+
+    REQUIRE(decoder.isValid() == true);
+}
+
+// ----------------------------------------------------------------------------
+
+TEST_CASE( "Map_Big_ContainingMapsAndArrays", "" ) {
+    std::vector<uint8_t> message{{
+            0xde, 0, 3,
+
+            // "h" -> map
+            0xa1, 'h', // 3
+            0xde, 0, 4, // 5
+            0xa1, 'a', 0xa1, 'A', // 8
+            0xa4, 's', 'd', 'f', 'g', 0x07, // 12
+            0xa2, 'g', 'H', 0xa3, 'h', 'e', 'l', // 18
+            0xa3, 's', 'd', 'f', 0xcc, 42, // 25
+
+            // "ym" -> array
+            0xa2, 'y', 'm', // 31
+            0xdc, 0x00, 0x03,
+            0x01,
+            0xa4, 's', 'd', 'f', 'g',
+            0xa3, 'h', 'e', 'l',
+
+            // "int" -> 8
+            0xa3, 'i', 'n', 't',
+            0x08
+
+        }};
+
+    MessagePackDecoder decoder(message.data(), message.size());
+
+    auto u8 = decoder.getUint8();
+    REQUIRE(u8.isValid() == false);
+
+    auto u16 = decoder.getUint16();
+    REQUIRE(u16.isValid() == false);
+
+    auto u32 = decoder.getUint32();
+    REQUIRE(u32.isValid() == false);
+
+    char str[16];
+    auto len = decoder.getString(str, sizeof(str));
+    REQUIRE(len.isValid() == false);
+
+    uint8_t bin[16];
+    auto len2 = decoder.getBinary(bin, sizeof(bin));
+    REQUIRE(len2.isValid() == false);
+
+    auto res = decoder.compareString("hello");
+    REQUIRE(res.isValid() == false);
+
+    REQUIRE(decoder["asd"].isValid() == false);
+    REQUIRE(decoder.accessArray(0).isValid() == false);
+    REQUIRE(decoder[""].isValid() == false);
+    REQUIRE(decoder["inti"].isValid() == false);
+    REQUIRE(decoder["g"].isValid() == false);
+    REQUIRE(decoder["gHa"].isValid() == false);
+    REQUIRE(decoder["h"].isValid() == true);
+    REQUIRE(decoder["ym"].isValid() == true);
+    REQUIRE(decoder["int"].isValid() == true);
+
+    {
+    char mapStr[5];
+    auto strlen = decoder["h"]["a"].getString(mapStr, sizeof(mapStr));
+    REQUIRE(strlen.isValid() == true);
+    REQUIRE(strlen.get() == 1);
+    REQUIRE(std::string(mapStr) == "A");
+    }
+    {
+    char mapStr[5];
+    auto strlen = decoder["h"]["gH"].getString(mapStr, sizeof(mapStr));
+    REQUIRE(strlen.isValid() == true);
+    REQUIRE(strlen.get() == 3);
+    REQUIRE(std::string(mapStr) == "hel");
+    }
+    {
+    auto i = decoder["h"]["sdf"].getUint8();
+    REQUIRE(i.isValid() == true);
+    REQUIRE(i.get() == 42);
+    }
+    {
+    auto i = decoder["h"]["sdfg"].getUint8();
+    REQUIRE(i.isValid() == true);
+    REQUIRE(i.get() == 7);
+    }
+
+    {
+    auto i = decoder["ym"].accessArray(0).getUint8();
+    REQUIRE(i.isValid() == true);
+    REQUIRE(i.get() == 1);
+    }
+    {
+    char mapStr[5];
+    auto strlen = decoder["ym"].accessArray(1).getString(mapStr, sizeof(mapStr));
+    REQUIRE(strlen.isValid() == true);
+    REQUIRE(strlen.get() == 4);
+    REQUIRE(std::string(mapStr) == "sdfg");
+    }
+    {
+    char mapStr[5];
+    auto strlen = decoder["ym"].accessArray(2).getString(mapStr, sizeof(mapStr));
+    REQUIRE(strlen.isValid() == true);
+    REQUIRE(strlen.get() == 3);
+    REQUIRE(std::string(mapStr) == "hel");
+    }
+
+    {
+    auto i = decoder["int"].getUint8();
+    REQUIRE(i.isValid() == true);
+    REQUIRE(i.get() == 8);
+    }
+    REQUIRE(decoder.isValid() == true);
+}
+
+TEST_CASE( "Array_Big_ContainingMapsAndArrays", "" ) {
+    std::vector<uint8_t> message{{
+            0xdc, 0, 3,
+
+            // map
+            0xde, 0, 4,
+            0xa1, 'a', 0xa1, 'A',
+            0xa4, 's', 'd', 'f', 'g', 0x07,
+            0xa2, 'g', 'H', 0xa3, 'h', 'e', 'l',
+            0xa3, 's', 'd', 'f', 0xcc, 42,
+
+            // array
+            0xdc, 0x00, 0x03,
+            0x01,
+            0xa4, 's', 'd', 'f', 'g',
+            0xa3, 'h', 'e', 'l',
+
+            // 8
+            0x08
+
+        }};
+
+    MessagePackDecoder decoder(message.data(), message.size());
+
+    auto u8 = decoder.getUint8();
+    REQUIRE(u8.isValid() == false);
+
+    auto u16 = decoder.getUint16();
+    REQUIRE(u16.isValid() == false);
+
+    auto u32 = decoder.getUint32();
+    REQUIRE(u32.isValid() == false);
+
+    char str[16];
+    auto len = decoder.getString(str, sizeof(str));
+    REQUIRE(len.isValid() == false);
+
+    uint8_t bin[16];
+    auto len2 = decoder.getBinary(bin, sizeof(bin));
+    REQUIRE(len2.isValid() == false);
+
+    auto res = decoder.compareString("hello");
+    REQUIRE(res.isValid() == false);
+
+    REQUIRE(decoder["asd"].isValid() == false);
+    REQUIRE(decoder.accessArray(0).isValid() == true);
+    REQUIRE(decoder.accessArray(1).isValid() == true);
+    REQUIRE(decoder.accessArray(2).isValid() == true);
+    REQUIRE(decoder.accessArray(3).isValid() == false);
+    REQUIRE(decoder[""].isValid() == false);
+    REQUIRE(decoder["inti"].isValid() == false);
+    REQUIRE(decoder["g"].isValid() == false);
+    REQUIRE(decoder["gHa"].isValid() == false);
+
+    {
+    char mapStr[5];
+    auto strlen = decoder.accessArray(0)["a"].getString(mapStr, sizeof(mapStr));
+    REQUIRE(strlen.isValid() == true);
+    REQUIRE(strlen.get() == 1);
+    REQUIRE(std::string(mapStr) == "A");
+    }
+    {
+    char mapStr[5];
+    auto strlen = decoder.accessArray(0)["gH"].getString(mapStr, sizeof(mapStr));
+    REQUIRE(strlen.isValid() == true);
+    REQUIRE(strlen.get() == 3);
+    REQUIRE(std::string(mapStr) == "hel");
+    }
+    {
+    auto i = decoder.accessArray(0)["sdf"].getUint8();
+    REQUIRE(i.isValid() == true);
+    REQUIRE(i.get() == 42);
+    }
+    {
+    auto i = decoder.accessArray(0)["sdfg"].getUint8();
+    REQUIRE(i.isValid() == true);
+    REQUIRE(i.get() == 7);
+    }
+
+    {
+    auto i = decoder.accessArray(1).accessArray(0).getUint8();
+    REQUIRE(i.isValid() == true);
+    REQUIRE(i.get() == 1);
+    }
+    {
+    char mapStr[5];
+    auto strlen = decoder.accessArray(1).accessArray(1).getString(mapStr, sizeof(mapStr));
+    REQUIRE(strlen.isValid() == true);
+    REQUIRE(strlen.get() == 4);
+    REQUIRE(std::string(mapStr) == "sdfg");
+    }
+    {
+    char mapStr[5];
+    auto strlen = decoder.accessArray(1).accessArray(2).getString(mapStr, sizeof(mapStr));
+    REQUIRE(strlen.isValid() == true);
+    REQUIRE(strlen.get() == 3);
+    REQUIRE(std::string(mapStr) == "hel");
+    }
+
+    {
+    auto i = decoder.accessArray(2).getUint8();
+    REQUIRE(i.isValid() == true);
+    REQUIRE(i.get() == 8);
+    }
+    REQUIRE(decoder.isValid() == true);
+}
