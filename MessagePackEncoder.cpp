@@ -64,7 +64,7 @@ bool MessagePackEncoder::addString(const char * f_string)
         {
             return false;
         }
-        m_messageBuffer[m_position] = 0xa | len;
+        m_messageBuffer[m_position] = 0xa0 | len;
         m_position += 1;
         memcpy(&m_messageBuffer[m_position], f_string, len);
         m_position += len;
@@ -167,7 +167,8 @@ bool MessagePackEncoder::addNestedStructure(uint8_t f_numElements, uint8_t f_sma
             return false;
         }
         m_messageBuffer[m_position] = f_bigPrefix;
-        m_messageBuffer[m_position+1] = f_numElements;
+        //Note: only support size < 256
+        m_messageBuffer[m_position+1] = 0;
         m_messageBuffer[m_position+2] = f_numElements;
         m_position += 3;
     }
