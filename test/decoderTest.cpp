@@ -16,7 +16,7 @@
 
 #include "Decoder.hpp"
 
-using namespace ZCMessagepack;
+using namespace ZCMessagePack;
 
 TEST_CASE( "DecodeEmptyMessageBuffer", "" ) {
     uint8_t buf[0];

@@ -18,7 +18,7 @@
 
 #include "Encoder.hpp"
 
-using namespace ZCMessagepack;
+using namespace ZCMessagePack;
 
 TEST_CASE( "EncodeEmptyMessageBuffer", "" ) {
     uint8_t buf[0];
