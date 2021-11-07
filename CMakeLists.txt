@@ -7,7 +7,6 @@ option(BUILD_TESTS "Build unit tests" OFF)
 if(BUILD_TESTS)
     enable_testing()
 endif()
-
 get_filename_component(ProjectId ${CMAKE_CURRENT_SOURCE_DIR} NAME)
 string(REPLACE " " "_" ProjectId ${ProjectId})
 
@@ -40,4 +39,14 @@ if(CMAKE_TESTING_ENABLED)
 
     add_test(${TARGET_NAME} ${PROJECT_BINARY_DIR}/${TARGET_NAME})
     message("Building unit-test. Executable=${PROJECT_BINARY_DIR}/${TARGET_NAME}")
+  
+    if (CATCH_ENABLE_COVERAGE)
+      set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${Catch2_SOURCE_DIR}/CMake/")
+      set(ENABLE_COVERAGE ON CACHE BOOL "Enable coverage build." FORCE)
+      find_package(codecov)
+      add_coverage(${TARGET_NAME})
+      list(APPEND LCOV_REMOVE_PATTERNS "'/usr/*'")
+      coverage_evaluate()
+    endif()
+
 endif()
