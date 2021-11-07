@@ -384,6 +384,21 @@ TEST_CASE( "EncodeString_big_extended", "" ) {
   }
 }
 
+
+TEST_CASE( "EncodeString_toolong", "" ) {
+  char string[256] = {'a'};
+  string[255] = '\0';
+  {
+    uint8_t buf[sizeof(string)-1];
+    Encoder encoder(buf, sizeof(buf));
+
+    auto result = encoder.addString(string);
+
+    REQUIRE(result == false);
+    REQUIRE(encoder.getMessageSize() == 0);
+  }
+
+}
 // string: "Кириллица"
 TEST_CASE( "EncodeString_utf8_russian", "" ) {
   const char* string = "Кириллица";
