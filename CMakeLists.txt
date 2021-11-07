@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 include(FetchContent)
 
-project(MessagePackInMemory)
+project(ZeroCopyMessagePack)
 set(CMAKE_BUILD_TYPE DEBUG)
 option(BUILD_TESTS "Build unit tests" OFF)
 if(BUILD_TESTS)
@@ -30,7 +30,7 @@ if(CMAKE_TESTING_ENABLED)
     )
     FetchContent_MakeAvailable(Catch2)
 
-    set(TARGET_NAME "MessagePackInMemoryTests")
+    set(TARGET_NAME "ZeroCopyMessagePackTests")
     file(GLOB ${PROJECT_NAME}_TEST_SRC ${PROJECT_SOURCE_DIR}/test/*.c*)
     add_executable(${TARGET_NAME}
         ${${PROJECT_NAME}_TEST_SRC}

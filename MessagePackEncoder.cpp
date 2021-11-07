@@ -1,6 +1,22 @@
+// Copyright 2021 Rainer Schoenberger
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 #include "MessagePackEncoder.hpp"
 #include <string.h>
 
+namespace ZCMessagepack
+{
 MessagePackEncoder::MessagePackEncoder(uint8_t * f_out_borrow_messageBuffer, uint8_t f_bufferSize) :
     m_messageBuffer(f_out_borrow_messageBuffer),
     m_bufferSize(f_bufferSize)
@@ -173,4 +189,5 @@ bool MessagePackEncoder::addNestedStructure(uint8_t f_numElements, uint8_t f_sma
         m_position += 3;
     }
     return true;
+}
 }
