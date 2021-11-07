@@ -16,7 +16,7 @@
 #include <inttypes.h>
 #include <string.h>
 
-namespace ZCMessagepack
+namespace ZCMessagePack
 {
 class Encoder
 {

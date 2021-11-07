@@ -15,7 +15,7 @@
 #include "Encoder.hpp"
 #include <string.h>
 
-namespace ZCMessagepack
+namespace ZCMessagePack
 {
 Encoder::Encoder(uint8_t * f_out_borrow_messageBuffer, uint8_t f_bufferSize) :
     m_messageBuffer(f_out_borrow_messageBuffer),

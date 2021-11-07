@@ -14,7 +14,7 @@
 
 #pragma once
 #include <inttypes.h>
-namespace ZCMessagepack
+namespace ZCMessagePack
 {
 template<class T>
 class Maybe

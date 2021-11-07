@@ -15,7 +15,7 @@
 #include "Decoder.hpp"
 #include <cstring>
 
-namespace ZCMessagepack
+namespace ZCMessagePack
 {
 Decoder Decoder::operator[](const char * f_mapKey) const
 {
