@@ -12,18 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "MessagePackEncoder.hpp"
+#include "Encoder.hpp"
 #include <string.h>
 
 namespace ZCMessagepack
 {
-MessagePackEncoder::MessagePackEncoder(uint8_t * f_out_borrow_messageBuffer, uint8_t f_bufferSize) :
+Encoder::Encoder(uint8_t * f_out_borrow_messageBuffer, uint8_t f_bufferSize) :
     m_messageBuffer(f_out_borrow_messageBuffer),
     m_bufferSize(f_bufferSize)
 {
 }
 
-bool MessagePackEncoder::addUint(uint32_t f_number)
+bool Encoder::addUint(uint32_t f_number)
 {
     if(f_number <= 0x7f)
     {
@@ -71,7 +71,7 @@ bool MessagePackEncoder::addUint(uint32_t f_number)
     return true;
 }
 
-bool MessagePackEncoder::addString(const char * f_string)
+bool Encoder::addString(const char * f_string)
 {
     size_t len = strlen(f_string);
     if(len <= 0x1f)
@@ -104,7 +104,7 @@ bool MessagePackEncoder::addString(const char * f_string)
     return true;
 }
 
-bool MessagePackEncoder::addBinary(const uint8_t * f_data, uint8_t f_size)
+bool Encoder::addBinary(const uint8_t * f_data, uint8_t f_size)
 {
     if(f_size <= 0xff)
     {
@@ -125,7 +125,7 @@ bool MessagePackEncoder::addBinary(const uint8_t * f_data, uint8_t f_size)
     return true;
 }
 
-bool MessagePackEncoder::addBool(bool f_value)
+bool Encoder::addBool(bool f_value)
 {
     if(sizeLeft() < 1)
     {
@@ -136,7 +136,7 @@ bool MessagePackEncoder::addBool(bool f_value)
     return true;
 }
 
-bool MessagePackEncoder::addNil()
+bool Encoder::addNil()
 {
     if(sizeLeft() < 1)
     {
@@ -147,25 +147,25 @@ bool MessagePackEncoder::addNil()
     return true;
 }
 
-bool MessagePackEncoder::addMap(uint8_t f_numElements)
+bool Encoder::addMap(uint8_t f_numElements)
 {
     return addNestedStructure(f_numElements, 0x80, 0xde);
 }
 
-bool MessagePackEncoder::addArray(uint8_t f_numElements)
+bool Encoder::addArray(uint8_t f_numElements)
 {
     return addNestedStructure(f_numElements, 0x90, 0xdc);
 }
 
-uint8_t MessagePackEncoder::getMessageSize() const
+uint8_t Encoder::getMessageSize() const
 {
     return m_position;
 }
-uint8_t MessagePackEncoder::sizeLeft()
+uint8_t Encoder::sizeLeft()
 {
     return m_bufferSize - m_position;
 }
-bool MessagePackEncoder::addNestedStructure(uint8_t f_numElements, uint8_t f_smallPrefix, uint8_t f_bigPrefix)
+bool Encoder::addNestedStructure(uint8_t f_numElements, uint8_t f_smallPrefix, uint8_t f_bigPrefix)
 {
     if(f_numElements <= 0x0f)
     {

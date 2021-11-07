@@ -14,11 +14,13 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "MessagePackDecoder.hpp"
+#include "Decoder.hpp"
+
+using namespace ZCMessagepack;
 
 TEST_CASE( "DecodeEmptyMessageBuffer", "" ) {
     uint8_t buf[0];
-    MessagePackDecoder decoder(buf, 0);
+    Decoder decoder(buf, 0);
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == false);
@@ -44,7 +46,7 @@ TEST_CASE( "DecodeEmptyMessageBuffer", "" ) {
 TEST_CASE( "DecodeNil", "" ) {
     std::vector<uint8_t> message{{0xc0}};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == false);
@@ -77,7 +79,7 @@ TEST_CASE( "DecodeNil", "" ) {
 TEST_CASE( "DecodeBool_true", "" ) {
     std::vector<uint8_t> message{{0xc3}};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == false);
@@ -111,7 +113,7 @@ TEST_CASE( "DecodeBool_true", "" ) {
 TEST_CASE( "DecodeBool_false", "" ) {
     std::vector<uint8_t> message{{0xc2}};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == false);
@@ -146,7 +148,7 @@ TEST_CASE( "DecodeBool_false", "" ) {
 TEST_CASE( "DecodeNumber_0_u7", "" ) {
     std::vector<uint8_t> message{{0x00}};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == true);
@@ -176,7 +178,7 @@ TEST_CASE( "DecodeNumber_0_u7", "" ) {
 TEST_CASE( "DecodeNumber_0_u8", "" ) {
     std::vector<uint8_t> message{{0xcc, 0x00}};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == true);
@@ -206,7 +208,7 @@ TEST_CASE( "DecodeNumber_0_u8", "" ) {
 TEST_CASE( "DecodeNumber_0_u16", "" ) {
     std::vector<uint8_t> message{{0xcd, 0x00, 0x00}};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == true);
@@ -236,7 +238,7 @@ TEST_CASE( "DecodeNumber_0_u16", "" ) {
 TEST_CASE( "DecodeNumber_0_u32", "" ) {
     std::vector<uint8_t> message{{0xce, 0x00, 0x00, 0x00, 0x00}};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == true);
@@ -266,7 +268,7 @@ TEST_CASE( "DecodeNumber_0_u32", "" ) {
 TEST_CASE( "DecodeNumber_0_u8_incomplete", "" ) {
     std::vector<uint8_t> message{{0xcc}};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == false);
@@ -293,7 +295,7 @@ TEST_CASE( "DecodeNumber_0_u8_incomplete", "" ) {
 TEST_CASE( "DecodeNumber_0_u16_incomplete", "" ) {
     std::vector<uint8_t> message{{0xcd, 0x00}};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == false);
@@ -320,7 +322,7 @@ TEST_CASE( "DecodeNumber_0_u16_incomplete", "" ) {
 TEST_CASE( "DecodeNumber_0_u32_incomplete", "" ) {
     std::vector<uint8_t> message{{0xce, 0x00, 0x00, 0x00}};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == false);
@@ -347,7 +349,7 @@ TEST_CASE( "DecodeNumber_0_u32_incomplete", "" ) {
 TEST_CASE( "DecodeNumber_127_u7", "" ) {
     std::vector<uint8_t> message{{0x7f}};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == true);
@@ -377,7 +379,7 @@ TEST_CASE( "DecodeNumber_127_u7", "" ) {
 TEST_CASE( "DecodeNumber_127_u8", "" ) {
     std::vector<uint8_t> message{{0xcc, 0x7f}};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == true);
@@ -407,7 +409,7 @@ TEST_CASE( "DecodeNumber_127_u8", "" ) {
 TEST_CASE( "DecodeNumber_127_u16", "" ) {
     std::vector<uint8_t> message{{0xcd, 0x00, 0x7f}};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == true);
@@ -437,7 +439,7 @@ TEST_CASE( "DecodeNumber_127_u16", "" ) {
 TEST_CASE( "DecodeNumber_127_u32", "" ) {
     std::vector<uint8_t> message{{0xce, 0x00, 0x00, 0x00, 0x7f}};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == true);
@@ -467,7 +469,7 @@ TEST_CASE( "DecodeNumber_127_u32", "" ) {
 TEST_CASE( "DecodeNumber_128_u8", "" ) {
     std::vector<uint8_t> message{{0xcc, 0x80}};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == true);
@@ -497,7 +499,7 @@ TEST_CASE( "DecodeNumber_128_u8", "" ) {
 TEST_CASE( "DecodeNumber_128_u16", "" ) {
     std::vector<uint8_t> message{{0xcd, 0x00, 0x80}};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == true);
@@ -527,7 +529,7 @@ TEST_CASE( "DecodeNumber_128_u16", "" ) {
 TEST_CASE( "DecodeNumber_128_u32", "" ) {
     std::vector<uint8_t> message{{0xce, 0x00, 0x00, 0x00, 0x80}};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == true);
@@ -557,7 +559,7 @@ TEST_CASE( "DecodeNumber_128_u32", "" ) {
 TEST_CASE( "DecodeNumber_256_u16", "" ) {
     std::vector<uint8_t> message{{0xcd, 0x01, 0x00}};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == false);
@@ -586,7 +588,7 @@ TEST_CASE( "DecodeNumber_256_u16", "" ) {
 TEST_CASE( "DecodeNumber_256_u32", "" ) {
     std::vector<uint8_t> message{{0xce, 0x00, 0x00, 0x01, 0x00}};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == false);
@@ -615,7 +617,7 @@ TEST_CASE( "DecodeNumber_256_u32", "" ) {
 TEST_CASE( "DecodeNumber_0x010000_u32", "" ) {
     std::vector<uint8_t> message{{0xce, 0x00, 0x01, 0x00, 0x00}};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == false);
@@ -644,7 +646,7 @@ TEST_CASE( "DecodeNumber_0x010000_u32", "" ) {
 TEST_CASE( "DecodeString_empty_small", "" ) {
     std::vector<uint8_t> message{{0xa0}};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == false);
@@ -689,7 +691,7 @@ TEST_CASE( "DecodeString_empty_small", "" ) {
 TEST_CASE( "DecodeString_empty_big", "" ) {
     std::vector<uint8_t> message{{0xd9, 0x00}};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == false);
@@ -730,7 +732,7 @@ TEST_CASE( "DecodeString_empty_big", "" ) {
 TEST_CASE( "DecodeString_empty_big_invalid", "" ) {
     std::vector<uint8_t> message{{0xd9}};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == false);
@@ -763,7 +765,7 @@ TEST_CASE( "DecodeString_empty_big_invalid", "" ) {
 TEST_CASE( "DecodeString_small_compact", "" ) {
     std::vector<uint8_t> message{{0xbf, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31}};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == false);
@@ -816,7 +818,7 @@ TEST_CASE( "DecodeString_small_compact", "" ) {
 TEST_CASE( "DecodeString_small_extended", "" ) {
     std::vector<uint8_t> message{{0xd9, 0x1f, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31}};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == false);
@@ -869,7 +871,7 @@ TEST_CASE( "DecodeString_small_extended", "" ) {
 TEST_CASE( "DecodeString_big_extended", "" ) {
     std::vector<uint8_t> message{{0xd9, 0x20, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32}};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == false);
@@ -923,7 +925,7 @@ TEST_CASE( "DecodeString_big_extended", "" ) {
 TEST_CASE( "DecodeMap_Empty_small", "" ) {
     std::vector<uint8_t> message{{0x80}};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == false);
@@ -953,7 +955,7 @@ TEST_CASE( "DecodeMap_Empty_small", "" ) {
 TEST_CASE( "DecodeMap_Mini_small", "" ) {
     std::vector<uint8_t> message{{0x81, 0xa1, 0x61, 0xa1, 0x41}};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == false);
@@ -995,7 +997,7 @@ TEST_CASE( "DecodeMap_Mini_3Entries", "" ) {
             0xa3, 's', 'd', 'f', 0xcc, 42
         }};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == false);
@@ -1060,7 +1062,7 @@ TEST_CASE( "DecodeMap_Big_4Entries", "" ) {
             0xa3, 's', 'd', 'f', 0xcc, 42
         }};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == false);
@@ -1125,7 +1127,7 @@ TEST_CASE( "DecodeArray_small_empty", "" ) {
             0x90
         }};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == false);
@@ -1168,7 +1170,7 @@ TEST_CASE( "DecodeArray_small_one", "" ) {
             0x91, 0x01,
         }};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == false);
@@ -1215,7 +1217,7 @@ TEST_CASE( "DecodeArray_small_three", "" ) {
             0xa3, 'h', 'e', 'l'
         }};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == false);
@@ -1274,7 +1276,7 @@ TEST_CASE( "DecodeArray_big_three", "" ) {
             0xa3, 'h', 'e', 'l'
         }};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == false);
@@ -1352,7 +1354,7 @@ TEST_CASE( "DecodeMap_Big_ContainingMapsAndArrays", "" ) {
 
         }};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == false);
@@ -1459,7 +1461,7 @@ TEST_CASE( "DecodeArray_Big_ContainingMapsAndArrays", "" ) {
 
         }};
 
-    MessagePackDecoder decoder(message.data(), message.size());
+    Decoder decoder(message.data(), message.size());
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == false);

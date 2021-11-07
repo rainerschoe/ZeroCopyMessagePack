@@ -12,26 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "MessagePackDecoder.hpp"
+#include "Decoder.hpp"
 #include <cstring>
 
 namespace ZCMessagepack
 {
-MessagePackDecoder MessagePackDecoder::operator[](const char * f_mapKey) const
+Decoder Decoder::operator[](const char * f_mapKey) const
 {
-    MessagePackDecoder newDecoder = *this;
+    Decoder newDecoder = *this;
     newDecoder.seekElementByKey(f_mapKey);
     return newDecoder;
 }
 
-MessagePackDecoder MessagePackDecoder::accessArray(uint8_t f_index) const
+Decoder Decoder::accessArray(uint8_t f_index) const
 {
-    MessagePackDecoder newDecoder = *this;
+    Decoder newDecoder = *this;
     newDecoder.seekElementByIndex(f_index);
     return newDecoder;
 }
 
-void MessagePackDecoder::seekElementByIndex(uint8_t f_index)
+void Decoder::seekElementByIndex(uint8_t f_index)
 {
     if(not m_validSeek)
     {
@@ -59,7 +59,7 @@ void MessagePackDecoder::seekElementByIndex(uint8_t f_index)
     return;
 }
 
-void MessagePackDecoder::seekElementByKey(const char * f_key)
+void Decoder::seekElementByKey(const char * f_key)
 {
     if(not m_validSeek)
     {
@@ -100,7 +100,7 @@ void MessagePackDecoder::seekElementByKey(const char * f_key)
     m_validSeek = false;
     return;
 }
-void MessagePackDecoder::seekNextElement()
+void Decoder::seekNextElement()
 {
     HeaderInfo header = decodeHeader();
     switch(header.headerType)
@@ -135,7 +135,7 @@ void MessagePackDecoder::seekNextElement()
 }
 
 
-MessagePackDecoder::HeaderInfo MessagePackDecoder::decodeHeader() const
+Decoder::HeaderInfo Decoder::decodeHeader() const
 {
     HeaderInfo newHeaderInfo;
     if(m_position >= m_messageSize)
@@ -249,7 +249,7 @@ MessagePackDecoder::HeaderInfo MessagePackDecoder::decodeHeader() const
 }
 
 
-Maybe<bool> MessagePackDecoder::isNil() const
+Maybe<bool> Decoder::isNil() const
 {
     HeaderInfo header = decodeHeader();
     if(header.headerType == HeaderInfo::Nil)
@@ -267,7 +267,7 @@ Maybe<bool> MessagePackDecoder::isNil() const
     }
 }
 
-Maybe<bool> MessagePackDecoder::getBool() const
+Maybe<bool> Decoder::getBool() const
 {
     HeaderInfo header = decodeHeader();
     if(header.headerType == HeaderInfo::True)
@@ -285,7 +285,7 @@ Maybe<bool> MessagePackDecoder::getBool() const
     }
 }
 
-Maybe<uint32_t> MessagePackDecoder::getUint32() const
+Maybe<uint32_t> Decoder::getUint32() const
 {
     HeaderInfo header = decodeHeader();
     if(
@@ -313,7 +313,7 @@ Maybe<uint32_t> MessagePackDecoder::getUint32() const
     }
 }
 
-Maybe<uint8_t> MessagePackDecoder::getUint8() const
+Maybe<uint8_t> Decoder::getUint8() const
 {
     auto u32val = getUint32();
     if((not u32val.isValid()) or u32val.get() > 0xff)
@@ -326,7 +326,7 @@ Maybe<uint8_t> MessagePackDecoder::getUint8() const
     }
 }
 
-Maybe<uint16_t> MessagePackDecoder::getUint16() const
+Maybe<uint16_t> Decoder::getUint16() const
 {
     auto u32val = getUint32();
     if((not u32val.isValid()) or u32val.get() > 0xffff)
@@ -339,7 +339,7 @@ Maybe<uint16_t> MessagePackDecoder::getUint16() const
     }
 }
 
-Maybe<uint16_t> MessagePackDecoder::getString(char * f_out_data, uint8_t f_maxSize) const
+Maybe<uint16_t> Decoder::getString(char * f_out_data, uint8_t f_maxSize) const
 {
     if(f_maxSize < 1)
     {
@@ -357,7 +357,7 @@ Maybe<uint16_t> MessagePackDecoder::getString(char * f_out_data, uint8_t f_maxSi
     return numBytes;
 }
 
-Maybe<bool> MessagePackDecoder::compareString(const char * f_string) const
+Maybe<bool> Decoder::compareString(const char * f_string) const
 {
     HeaderInfo header = decodeHeader();
     if(
@@ -386,7 +386,7 @@ Maybe<bool> MessagePackDecoder::compareString(const char * f_string) const
     return Maybe<bool>(true);
 }
 
-Maybe<uint16_t> MessagePackDecoder::getBinary(uint8_t * f_out_data, uint8_t f_maxSize) const
+Maybe<uint16_t> Decoder::getBinary(uint8_t * f_out_data, uint8_t f_maxSize) const
 {
     HeaderInfo header = decodeHeader();
     if(
@@ -406,7 +406,7 @@ Maybe<uint16_t> MessagePackDecoder::getBinary(uint8_t * f_out_data, uint8_t f_ma
 }
 
 
-bool MessagePackDecoder::isValid()
+bool Decoder::isValid()
 {
     auto header = decodeHeader();
     if(header.headerType == HeaderInfo::InvalidHeader)

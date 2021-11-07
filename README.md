@@ -16,7 +16,7 @@ Encoding:
 ```C++
 uint8_t message[32];
 
-MessagePackEncoder encoder(message, sizeof(message));
+ZCMessagePack::Encoder encoder(message, sizeof(message));
 
 bool encodeResult = true;
 
@@ -42,7 +42,7 @@ if(encodeResult)
 
 Decoding:
 ```C++
-MessagePackDecoder decoder(message, messageSize);
+ZCMessagePack::Decoder decoder(message, messageSize);
 
 char str[32];
 auto stringLength = decoder["hello"].getString(str, sizeof(str));

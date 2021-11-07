@@ -18,13 +18,13 @@
 
 namespace ZCMessagepack
 {
-class MessagePackEncoder
+class Encoder
 {
     public:
         /// Constructs the encoder.
         /// The given buffer f_out_borrow_messageBuffer will be used to write
         /// encoded data to.
-        MessagePackEncoder(uint8_t * f_out_borrow_messageBuffer, uint8_t f_bufferSize);
+        Encoder(uint8_t * f_out_borrow_messageBuffer, uint8_t f_bufferSize);
 
         /// Encodes an unsigned integer into the buffer.
         bool addUint(uint32_t f_number);

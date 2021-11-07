@@ -37,10 +37,10 @@ class Maybe
     T m_value;
 };
 
-class MessagePackDecoder
+class Decoder
 {
     public:
-        MessagePackDecoder(const uint8_t * f_borrow_messageBuffer, uint8_t f_messageSize) :
+        Decoder(const uint8_t * f_borrow_messageBuffer, uint8_t f_messageSize) :
             m_messageBuffer(f_borrow_messageBuffer),
             m_messageSize(f_messageSize)
         {
@@ -52,10 +52,10 @@ class MessagePackDecoder
         
         /// Returns a new decoder which is seeked to the given map key.
         /// FIXME: cannot overload operator[] as implicit conversion is performed from int literal to char * whcih makes it ambiguous
-        MessagePackDecoder operator[](const char * f_mapKey) const;
+        Decoder operator[](const char * f_mapKey) const;
 
         /// Returns a new decoder which is seeked to the given array index.
-        MessagePackDecoder accessArray(uint8_t f_index) const;
+        Decoder accessArray(uint8_t f_index) const;
 
         /// Resets decoder position to the message root element.
         void seekReset()

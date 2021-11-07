@@ -15,11 +15,13 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_string.hpp>
 
-#include "MessagePackEncoder.hpp"
+#include "Encoder.hpp"
+
+using namespace ZCMessagepack;
 
 TEST_CASE( "EncodeEmptyMessageBuffer", "" ) {
     uint8_t buf[0];
-    MessagePackEncoder encoder(buf, 0);
+    Encoder encoder(buf, 0);
 
     REQUIRE(encoder.getMessageSize() == 0);
 
@@ -28,7 +30,7 @@ TEST_CASE( "EncodeEmptyMessageBuffer", "" ) {
 TEST_CASE( "EncodeNil", "" ) {
   {
     uint8_t buf[0];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addNil();
 
@@ -38,7 +40,7 @@ TEST_CASE( "EncodeNil", "" ) {
 
   {
     uint8_t buf[1];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addNil();
 
@@ -51,7 +53,7 @@ TEST_CASE( "EncodeNil", "" ) {
 TEST_CASE( "EncodeBool_true", "" ) {
   {
     uint8_t buf[0];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addBool(true);
 
@@ -61,7 +63,7 @@ TEST_CASE( "EncodeBool_true", "" ) {
 
   {
     uint8_t buf[1];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addBool(true);
 
@@ -73,7 +75,7 @@ TEST_CASE( "EncodeBool_true", "" ) {
 TEST_CASE( "EncodeBool_false", "" ) {
   {
     uint8_t buf[0];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addBool(false);
 
@@ -83,7 +85,7 @@ TEST_CASE( "EncodeBool_false", "" ) {
 
   {
     uint8_t buf[1];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addBool(false);
 
@@ -97,7 +99,7 @@ TEST_CASE( "EncodeBool_false", "" ) {
 TEST_CASE( "EncodeNumber_u7", "" ) {
   {
     uint8_t buf[0];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addUint(0);
 
@@ -107,7 +109,7 @@ TEST_CASE( "EncodeNumber_u7", "" ) {
 
   {
     uint8_t buf[1];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addUint(0);
 
@@ -118,7 +120,7 @@ TEST_CASE( "EncodeNumber_u7", "" ) {
 
   {
     uint8_t buf[2];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addUint(1);
 
@@ -129,7 +131,7 @@ TEST_CASE( "EncodeNumber_u7", "" ) {
 
   {
     uint8_t buf[4];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addUint(127);
 
@@ -143,7 +145,7 @@ TEST_CASE( "EncodeNumber_u7", "" ) {
 TEST_CASE( "EncodeNumber_u8", "" ) {
   {
     uint8_t buf[1];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addUint(128);
 
@@ -153,7 +155,7 @@ TEST_CASE( "EncodeNumber_u8", "" ) {
 
   {
     uint8_t buf[2];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addUint(128);
 
@@ -164,7 +166,7 @@ TEST_CASE( "EncodeNumber_u8", "" ) {
 
   {
     uint8_t buf[3];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addUint(255);
 
@@ -178,7 +180,7 @@ TEST_CASE( "EncodeNumber_u8", "" ) {
 TEST_CASE( "EncodeNumber_u16", "" ) {
   {
     uint8_t buf[2];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addUint(256);
 
@@ -188,7 +190,7 @@ TEST_CASE( "EncodeNumber_u16", "" ) {
 
   {
     uint8_t buf[3];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addUint(256);
 
@@ -199,7 +201,7 @@ TEST_CASE( "EncodeNumber_u16", "" ) {
 
   {
     uint8_t buf[4];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addUint(65535);
 
@@ -212,7 +214,7 @@ TEST_CASE( "EncodeNumber_u16", "" ) {
 TEST_CASE( "EncodeNumber_u32", "" ) {
   {
     uint8_t buf[4];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addUint(65536);
 
@@ -222,7 +224,7 @@ TEST_CASE( "EncodeNumber_u32", "" ) {
 
   {
     uint8_t buf[5];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addUint(65536);
 
@@ -233,7 +235,7 @@ TEST_CASE( "EncodeNumber_u32", "" ) {
 
   {
     uint8_t buf[6];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addUint(2147483647);
 
@@ -244,7 +246,7 @@ TEST_CASE( "EncodeNumber_u32", "" ) {
 
   {
     uint8_t buf[7];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addUint(2147483648);
 
@@ -255,7 +257,7 @@ TEST_CASE( "EncodeNumber_u32", "" ) {
 
   {
     uint8_t buf[8];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addUint(4294967295);
 
@@ -270,7 +272,7 @@ TEST_CASE( "EncodeNumber_u64", "[!shouldfail]" ) {
   uint64_t bignum = 4294967296;
   {
     uint8_t buf[0];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addUint(bignum);
 
@@ -280,7 +282,7 @@ TEST_CASE( "EncodeNumber_u64", "[!shouldfail]" ) {
 
   {
     uint8_t buf[message.size()];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addUint(bignum);
 
@@ -295,7 +297,7 @@ TEST_CASE( "EncodeNumber_u64", "[!shouldfail]" ) {
 TEST_CASE( "EncodeString_empty_small", "" ) {
   {
     uint8_t buf[0];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addString("");
 
@@ -305,7 +307,7 @@ TEST_CASE( "EncodeString_empty_small", "" ) {
 
   {
     uint8_t buf[1];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addString("");
 
@@ -317,7 +319,7 @@ TEST_CASE( "EncodeString_empty_small", "" ) {
 
   {
     uint8_t buf[4];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addString("a");
 
@@ -336,7 +338,7 @@ TEST_CASE( "EncodeString_small_compact", "" ) {
   std::vector<uint8_t> message{{0xbf, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31}};
   {
     uint8_t buf[message.size()-1];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addString(string);
 
@@ -346,7 +348,7 @@ TEST_CASE( "EncodeString_small_compact", "" ) {
 
   {
     uint8_t buf[message.size()+1];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addString(string);
 
@@ -362,7 +364,7 @@ TEST_CASE( "EncodeString_big_extended", "" ) {
   std::vector<uint8_t> message{{0xd9, 0x20, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32}};
   {
     uint8_t buf[message.size()-1];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addString(string);
 
@@ -372,7 +374,7 @@ TEST_CASE( "EncodeString_big_extended", "" ) {
 
   {
     uint8_t buf[message.size()+1];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addString(string);
 
@@ -388,7 +390,7 @@ TEST_CASE( "EncodeString_utf8_russian", "" ) {
   std::vector<uint8_t> message{{0xb2, 0xd0, 0x9a, 0xd0, 0xb8, 0xd1, 0x80, 0xd0, 0xb8, 0xd0, 0xbb, 0xd0, 0xbb, 0xd0, 0xb8, 0xd1, 0x86, 0xd0, 0xb0}};
   {
     uint8_t buf[message.size()-1];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addString(string);
 
@@ -398,7 +400,7 @@ TEST_CASE( "EncodeString_utf8_russian", "" ) {
 
   {
     uint8_t buf[message.size()+1];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addString(string);
 
@@ -413,7 +415,7 @@ TEST_CASE( "EncodeString_utf8_chinese", "" ) {
   std::vector<uint8_t> message{{0xa6, 0xe6, 0xb1, 0x89, 0xe5, 0xad, 0x97}};
   {
     uint8_t buf[message.size()-1];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addString(string);
 
@@ -423,7 +425,7 @@ TEST_CASE( "EncodeString_utf8_chinese", "" ) {
 
   {
     uint8_t buf[message.size()+1];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addString(string);
 
@@ -437,7 +439,7 @@ TEST_CASE( "EncodeString_utf8_chinese", "" ) {
 TEST_CASE( "EncodeMap_Empty_small", "" ) {
   {
     uint8_t buf[0];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addMap(0);
 
@@ -447,7 +449,7 @@ TEST_CASE( "EncodeMap_Empty_small", "" ) {
 
   {
     uint8_t buf[1];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addMap(0);
 
@@ -461,7 +463,7 @@ TEST_CASE( "EncodeMap_Mini_small", "" ) {
   std::vector<uint8_t> message{{0x81, 0xa1, 0x61, 0x01}};
   {
     uint8_t buf[message.size()-1];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addMap(1);
     REQUIRE(result == true);
@@ -475,7 +477,7 @@ TEST_CASE( "EncodeMap_Mini_small", "" ) {
 
   {
     uint8_t buf[message.size()+1];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addMap(1);
     REQUIRE(result == true);
@@ -493,7 +495,7 @@ TEST_CASE( "EncodeMap_small", "" ) {
   std::vector<uint8_t> message{{0x81, 0xa1, 0x61, 0xa1, 0x41}};
   {
     uint8_t buf[message.size()-1];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addMap(1);
     REQUIRE(result == true);
@@ -507,7 +509,7 @@ TEST_CASE( "EncodeMap_small", "" ) {
 
   {
     uint8_t buf[message.size()+1];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addMap(1);
     REQUIRE(result == true);
@@ -526,7 +528,7 @@ TEST_CASE( "EncodeArray_small_empty", "" ) {
         }};
   {
     uint8_t buf[message.size()-1];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addArray(0);
     REQUIRE(result == false);
@@ -536,7 +538,7 @@ TEST_CASE( "EncodeArray_small_empty", "" ) {
 
   {
     uint8_t buf[message.size()+1];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addArray(0);
     REQUIRE(result == true);
@@ -552,7 +554,7 @@ TEST_CASE( "EncodeArray_small_one", "" ) {
         }};
   {
     uint8_t buf[message.size()-1];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addArray(1);
     REQUIRE(result == true);
@@ -564,7 +566,7 @@ TEST_CASE( "EncodeArray_small_one", "" ) {
 
   {
     uint8_t buf[message.size()+1];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addArray(1);
     REQUIRE(result == true);
@@ -582,7 +584,7 @@ TEST_CASE( "EncodeArray_small_string", "" ) {
         }};
   {
     uint8_t buf[message.size()-1];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addArray(1);
     REQUIRE(result == true);
@@ -593,7 +595,7 @@ TEST_CASE( "EncodeArray_small_string", "" ) {
   }
   {
     uint8_t buf[message.size()+1];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addArray(1);
     REQUIRE(result == true);
@@ -614,7 +616,7 @@ TEST_CASE( "EncodeArray_small", "" ) {
 
   {
     uint8_t buf[message.size()-1];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addArray(sizeof(array));
     REQUIRE(result == true);
@@ -632,7 +634,7 @@ TEST_CASE( "EncodeArray_small", "" ) {
 
   {
     uint8_t buf[message.size()+1];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addArray(1);
     REQUIRE(result == true);
@@ -650,7 +652,7 @@ TEST_CASE( "EncodeArray_small", "" ) {
 
   {
     uint8_t buf[message.size()+1];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addArray(sizeof(array));
     REQUIRE(result == true);
@@ -672,7 +674,7 @@ TEST_CASE( "EncodeArray_big", "" ) {
 
   {
     uint8_t buf[message.size()-1];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addArray(sizeof(array));
     REQUIRE(result == true);
@@ -690,7 +692,7 @@ TEST_CASE( "EncodeArray_big", "" ) {
 
   {
     uint8_t buf[message.size()+1];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addArray(1);
     REQUIRE(result == true);
@@ -707,7 +709,7 @@ TEST_CASE( "EncodeArray_big", "" ) {
 
   {
     uint8_t buf[message.size()+1];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addArray(sizeof(array));
     REQUIRE(result == true);
@@ -730,7 +732,7 @@ TEST_CASE( "EncodeArray_of_array", "" ) {
         }};
   {
     uint8_t buf[message.size()-1];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addArray(1);
     REQUIRE(result == true);
@@ -742,7 +744,7 @@ TEST_CASE( "EncodeArray_of_array", "" ) {
 
   {
     uint8_t buf[message.size()];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addArray(1);
     REQUIRE(result == true);
@@ -760,7 +762,7 @@ TEST_CASE( "EncodeArray_of_map", "" ) {
         }};
   {
     uint8_t buf[message.size()-1];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addArray(1);
     REQUIRE(result == true);
@@ -772,7 +774,7 @@ TEST_CASE( "EncodeArray_of_map", "" ) {
 
   {
     uint8_t buf[message.size()];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addArray(1);
     REQUIRE(result == true);
@@ -790,7 +792,7 @@ TEST_CASE( "EncodeMap_of_map", "" ) {
         }};
   {
     uint8_t buf[message.size()-1];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addMap(1);
     REQUIRE(result == true);
@@ -804,7 +806,7 @@ TEST_CASE( "EncodeMap_of_map", "" ) {
 
   {
     uint8_t buf[message.size()];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addMap(1);
     REQUIRE(result == true);
@@ -824,7 +826,7 @@ TEST_CASE( "EncodeMap_of_array", "" ) {
         }};
   {
     uint8_t buf[message.size()-1];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addMap(1);
     REQUIRE(result == true);
@@ -838,7 +840,7 @@ TEST_CASE( "EncodeMap_of_array", "" ) {
 
   {
     uint8_t buf[message.size()];
-    MessagePackEncoder encoder(buf, sizeof(buf));
+    Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addMap(1);
     REQUIRE(result == true);
