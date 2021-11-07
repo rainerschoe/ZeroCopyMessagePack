@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "Decoder.hpp"
-#include <cstring>
+#include <string.h>
 
 namespace ZCMessagePack
 {
