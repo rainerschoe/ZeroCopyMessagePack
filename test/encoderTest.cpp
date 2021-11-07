@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <catch2/catch_test_macros.hpp>
+#include <algorithm>
 #include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "Encoder.hpp"
@@ -386,7 +387,8 @@ TEST_CASE( "EncodeString_big_extended", "" ) {
 
 
 TEST_CASE( "EncodeString_toolong", "" ) {
-  char string[256] = {'a'};
+  char string[256];
+  std::fill_n(string, 255, 'a');
   string[255] = '\0';
   {
     uint8_t buf[sizeof(string)-1];
