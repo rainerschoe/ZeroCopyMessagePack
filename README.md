@@ -1,4 +1,5 @@
 # ZeroCopyMessagePack
+[![codecov](https://codecov.io/gh/callalilychen/ZeroCopyMessagePack/branch/master/graph/badge.svg?token=S235FDPV5E)](https://codecov.io/gh/callalilychen/ZeroCopyMessagePack)
 
 This is a very lightweight C++ implementation for the MessagePack data format.
 
