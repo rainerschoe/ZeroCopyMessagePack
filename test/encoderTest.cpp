@@ -724,6 +724,89 @@ TEST_CASE( "EncodeArray_big", "" ) {
 }
 
 // ----------------------------------------------------------------------------
+// Binary
+TEST_CASE( "EncodeBinary_empty", "" ) {
+  std::vector<uint8_t> message{{
+            0xc4, 0x00
+        }};
+  {
+    uint8_t buf[message.size()-1];
+    Encoder encoder(buf, sizeof(buf));
+
+    auto result = encoder.addBinary(0, 0);
+    REQUIRE(result == false);
+
+    REQUIRE(encoder.getMessageSize() == 0);
+  }
+
+  {
+    uint8_t buf[message.size()];
+    Encoder encoder(buf, sizeof(buf));
+
+    auto result = encoder.addBinary(0, 0);
+    REQUIRE(result == true);
+
+    REQUIRE(encoder.getMessageSize() == message.size());
+    REQUIRE(std::vector<uint8_t>(buf, buf+encoder.getMessageSize()) ==  message);
+  }
+}
+
+TEST_CASE( "EncodeBinary_size_one", "" ) {
+  std::vector<uint8_t> message{{
+            0xc4, 0x01, 0x01
+        }};
+  uint8_t binary[1] = {1};
+  {
+    uint8_t buf[message.size()-1];
+    Encoder encoder(buf, sizeof(buf));
+
+    auto result = encoder.addBinary(binary, sizeof(binary));
+    REQUIRE(result == false);
+
+    REQUIRE(encoder.getMessageSize() == 0);
+  }
+
+  {
+    uint8_t buf[message.size()];
+    Encoder encoder(buf, sizeof(buf));
+
+    auto result = encoder.addBinary(binary, sizeof(binary));
+    REQUIRE(result == true);
+
+    REQUIRE(encoder.getMessageSize() == message.size());
+    REQUIRE(std::vector<uint8_t>(buf, buf+encoder.getMessageSize()) ==  message);
+  }
+}
+
+TEST_CASE( "EncodeBinary_size_two", "" ) {
+  std::vector<uint8_t> message{{
+            0xc4, 0x02, 0x00, 0xff
+        }};
+  uint8_t binary[] = {0, 255};
+  {
+    uint8_t buf[message.size()-1];
+    Encoder encoder(buf, sizeof(buf));
+
+    auto result = encoder.addBinary(binary, sizeof(binary));
+    REQUIRE(result == false);
+
+    REQUIRE(encoder.getMessageSize() == 0);
+  }
+
+  {
+    uint8_t buf[message.size()];
+    Encoder encoder(buf, sizeof(buf));
+
+    auto result = encoder.addBinary(binary, sizeof(binary));
+    REQUIRE(result == true);
+
+    REQUIRE(encoder.getMessageSize() == message.size());
+    REQUIRE(std::vector<uint8_t>(buf, buf+encoder.getMessageSize()) ==  message);
+  }
+}
+
+
+// ----------------------------------------------------------------------------
 // nested
 
 TEST_CASE( "EncodeArray_of_array", "" ) {

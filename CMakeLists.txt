@@ -40,7 +40,7 @@ if(CMAKE_TESTING_ENABLED)
     add_test(${TARGET_NAME} ${PROJECT_BINARY_DIR}/${TARGET_NAME})
     message("Building unit-test. Executable=${PROJECT_BINARY_DIR}/${TARGET_NAME}")
   
-    if (CATCH_ENABLE_COVERAGE)
+    if (ENABLE_COVERAGE)
       set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${Catch2_SOURCE_DIR}/CMake/")
       set(ENABLE_COVERAGE ON CACHE BOOL "Enable coverage build." FORCE)
       find_package(codecov)
