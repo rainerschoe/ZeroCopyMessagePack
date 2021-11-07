@@ -40,14 +40,17 @@ if(CMAKE_TESTING_ENABLED)
     add_test(${TARGET_NAME} ${PROJECT_BINARY_DIR}/${TARGET_NAME})
     message("Building unit-test. Executable=${PROJECT_BINARY_DIR}/${TARGET_NAME}")
   
-    if (ENABLE_COVERAGE)
-      set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${Catch2_SOURCE_DIR}/CMake/")
-      set(ENABLE_COVERAGE ON CACHE BOOL "Enable coverage build." FORCE)
-      find_package(codecov)
-      add_coverage(${PROJECT_NAME})
-      add_coverage(${TARGET_NAME})
-      list(APPEND LCOV_REMOVE_PATTERNS "'/usr/*'")
-      coverage_evaluate()
-    endif()
+    FetchContent_Declare(
+      cmake-codecov
+      GIT_REPOSITORY https://github.com/callalilychen/CMake-codecov.git
+      GIT_TAG        9d810304424e3bf0b0d8d051c59786765f534568
+    )
+    FetchContent_Populate(cmake-codecov)
+    set(CMAKE_MODULE_PATH "${cmake-codecov_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+    find_package(codecov)
+    add_coverage(${PROJECT_NAME})
+    add_coverage(${TARGET_NAME})
+    list(APPEND LCOV_REMOVE_PATTERNS "'/usr/*'")
+    coverage_evaluate()
 
 endif()
