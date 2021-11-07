@@ -387,11 +387,11 @@ TEST_CASE( "EncodeString_big_extended", "" ) {
 
 
 TEST_CASE( "EncodeString_toolong", "" ) {
-  char string[256];
-  std::fill_n(string, 255, 'a');
-  string[255] = '\0';
+  char string[257];
+  std::fill_n(string, 256, 'a');
+  string[256] = '\0';
   {
-    uint8_t buf[sizeof(string)-1];
+    uint8_t buf[255];
     Encoder encoder(buf, sizeof(buf));
 
     auto result = encoder.addString(string);
@@ -539,6 +539,31 @@ TEST_CASE( "EncodeMap_small", "" ) {
     REQUIRE(std::vector<uint8_t>(buf, buf+encoder.getMessageSize()) == message);
   }
 }
+
+TEST_CASE( "EncodeMap_big", "" ) {
+  std::vector<uint8_t> message{{0xde, 0x00, 0x10}};
+  {
+    uint8_t buf[message.size()-1];
+    Encoder encoder(buf, sizeof(buf));
+
+    auto result = encoder.addMap(16);
+    REQUIRE(result == false);
+
+    REQUIRE(encoder.getMessageSize() == 0);
+  }
+
+  {
+    uint8_t buf[message.size()+1];
+    Encoder encoder(buf, sizeof(buf));
+
+    auto result = encoder.addMap(16);
+    REQUIRE(result == true);
+
+    REQUIRE(encoder.getMessageSize() == message.size());
+    REQUIRE(std::vector<uint8_t>(buf, buf+encoder.getMessageSize()) == message);
+  }
+}
+
 TEST_CASE( "EncodeArray_small_empty", "" ) {
   std::vector<uint8_t> message{{
             0x90
