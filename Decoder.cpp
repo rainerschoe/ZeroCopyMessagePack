@@ -232,7 +232,7 @@ Decoder::HeaderInfo Decoder::decodeHeader() const
             }
             newHeaderInfo.headerType = HeaderInfo::Array;
             newHeaderInfo.headerSize = 3;
-            newHeaderInfo.numPayloadElements = (m_messageBuffer[m_position + 1] << 8) | m_messageBuffer[m_position + 2];
+            newHeaderInfo.numPayloadElements = (static_cast<uint16_t>(m_messageBuffer[m_position + 1]) << 8) | m_messageBuffer[m_position + 2];
             return newHeaderInfo;
         case 0xde:
             if(m_messageSize - m_position < 3)
@@ -241,7 +241,7 @@ Decoder::HeaderInfo Decoder::decodeHeader() const
             }
             newHeaderInfo.headerType = HeaderInfo::Map;
             newHeaderInfo.headerSize = 3;
-            newHeaderInfo.numPayloadElements = (m_messageBuffer[m_position + 1] << 8) | m_messageBuffer[m_position + 2];
+            newHeaderInfo.numPayloadElements = (static_cast<uint16_t>(m_messageBuffer[m_position + 1]) << 8) | m_messageBuffer[m_position + 2];
             return newHeaderInfo;
     }
 
@@ -304,9 +304,9 @@ Maybe<uint32_t> Decoder::getUint32() const
         case 1:
             return Maybe<uint32_t>(m_messageBuffer[m_position + 1]);
         case 2:
-            return Maybe<uint32_t>(m_messageBuffer[m_position + 1] << 8 | m_messageBuffer[m_position + 2]);
+            return Maybe<uint32_t>(static_cast<uint32_t>(m_messageBuffer[m_position + 1]) << 8 | m_messageBuffer[m_position + 2]);
         case 4:
-            return Maybe<uint32_t>(m_messageBuffer[m_position + 1] << 24 | m_messageBuffer[m_position + 2] << 16 | m_messageBuffer[m_position + 3] << 8 | m_messageBuffer[m_position + 4]);
+            return Maybe<uint32_t>(static_cast<uint32_t>(m_messageBuffer[m_position + 1]) << 24 | static_cast<uint32_t>(m_messageBuffer[m_position + 2]) << 16 | static_cast<uint32_t>(m_messageBuffer[m_position + 3]) << 8 | m_messageBuffer[m_position + 4]);
         default:
             // number too big
             return Maybe<uint32_t>();
