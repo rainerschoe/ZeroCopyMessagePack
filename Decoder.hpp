@@ -50,14 +50,17 @@ class Decoder
         //---------------------------------------------------------------------
         /// The following functions navigate the message:
         
-        /// Returns a new decoder which is seeked to the given map key.
-        /// FIXME: cannot overload operator[] as implicit conversion is performed from int literal to char * whcih makes it ambiguous
+        /// Returns a new decoder which is seeked to the map value, matching given key.
+        /// Returned Decoder will refer to the map value (not the key).
         Decoder operator[](const char * f_mapKey) const;
 
         /// Returns a new decoder which is seeked to the given array index.
+        /// If f_index is out of range, the decoder will become invalid.
+        /// NOTE: cannot overload operator[] for array access as implicit conversion is performed from int literal to char * whcih makes it ambiguous
         Decoder accessArray(uint8_t f_index) const;
 
         /// Resets decoder position to the message root element.
+        /// This will recover from an invalid decoder state.
         void seekReset()
         {
             m_position = 0;
@@ -68,7 +71,20 @@ class Decoder
         void seekElementByKey(const char * f_key);
 
         /// Set decoder position to array element with given index.
+        /// If f_index is out of range, the decoder will become invalid.
         void seekElementByIndex(uint8_t f_index);
+
+        /// Retrive both the Key and the Value of a map entry at given index.
+        /// @param f_index given index of the map entry. If out of range, an
+        ///                invalid Decoder is returned
+        /// @param f_out_key user-allocated buffer where the key string will be
+        ///                  written to.
+        ///                  If a string is written (Valid decoder returned)
+        ///                  it is always null terminated.
+        /// @param f_maxSize Maximum number of bytes to write to f_out_key
+        ///                  (including null termination)
+        Decoder getMapEntryByIndex(uint8_t f_index, char * f_out_key, uint8_t f_maxSize);
+
         //---------------------------------------------------------------------
 
         //---------------------------------------------------------------------
@@ -77,12 +93,11 @@ class Decoder
         /// Not yet implemented
         Maybe<uint8_t> getArraySize() const;
 
-        /// Not yet implemented
+        /// If decoder refers to a map, return it's number of entries
+        /// (number of entries = number of Key-Value-Pairs).
+        /// If decoder does not refer to a map, returns invalid Maybe instance.
         Maybe<uint8_t> getMapSize() const;
 
-        /// Not yet implemented
-        bool getMapKey(uint8_t f_index, char * f_out_mapKey, uint8_t f_maxSize) const;
-        
         /// Check if current seek position points to valid data
         bool isValid();
 
@@ -151,6 +166,12 @@ class Decoder
         HeaderInfo decodeHeader() const;
 
         void seekNextElement();
+
+        /// Set decoder position to map element with given index.
+        /// Only works if current seek position is at a map, otherwise Decoder
+        /// is set to invalid seek.
+        /// After successful seek, key can be read first 
+        void seekMapEntryByIndex(uint8_t f_index);
 
         const uint8_t * m_messageBuffer;
         uint8_t m_messageSize;

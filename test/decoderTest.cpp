@@ -22,6 +22,9 @@ TEST_CASE( "DecodeEmptyMessageBuffer", "" ) {
     uint8_t buf[0];
     Decoder decoder(buf, 0);
 
+    auto size = decoder.getMapSize();
+    REQUIRE(size.isValid() == false);
+
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == false);
 
@@ -41,6 +44,17 @@ TEST_CASE( "DecodeEmptyMessageBuffer", "" ) {
 
     auto res = decoder.compareString("hello");
     REQUIRE(res.isValid() == false);
+
+    {
+    auto value = decoder.getMapEntryByIndex(0, str, sizeof(str));
+    REQUIRE(value.isValid() == false);
+    }
+
+    {
+    auto value = decoder.getMapEntryByIndex(1, str, sizeof(str));
+    REQUIRE(value.isValid() == false);
+    }
+
 }
 
 TEST_CASE( "DecodeNil", "" ) {
@@ -74,6 +88,16 @@ TEST_CASE( "DecodeNil", "" ) {
     auto nil = decoder.isNil();
     REQUIRE(nil.isValid() == true);
     REQUIRE(nil.get() == true);
+
+    {
+    auto value = decoder.getMapEntryByIndex(0, str, sizeof(str));
+    REQUIRE(value.isValid() == false);
+    }
+
+    {
+    auto value = decoder.getMapEntryByIndex(1, str, sizeof(str));
+    REQUIRE(value.isValid() == false);
+    }
 }
 
 TEST_CASE( "DecodeBool_true", "" ) {
@@ -927,6 +951,10 @@ TEST_CASE( "DecodeMap_Empty_small", "" ) {
 
     Decoder decoder(message.data(), message.size());
 
+    auto size = decoder.getMapSize();
+    REQUIRE(size.isValid() == true);
+
+
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == false);
 
@@ -947,6 +975,11 @@ TEST_CASE( "DecodeMap_Empty_small", "" ) {
     auto res = decoder.compareString("hello");
     REQUIRE(res.isValid() == false);
 
+    {
+    auto value = decoder.getMapEntryByIndex(0, str, sizeof(str));
+    REQUIRE(value.isValid() == false);
+    }
+
     REQUIRE(decoder["asd"].isValid() == false);
     REQUIRE(decoder.accessArray(0).isValid() == false);
     REQUIRE(decoder.isValid() == true);
@@ -956,6 +989,10 @@ TEST_CASE( "DecodeMap_Mini_small", "" ) {
     std::vector<uint8_t> message{{0x81, 0xa1, 0x61, 0xa1, 0x41}};
 
     Decoder decoder(message.data(), message.size());
+
+    auto size = decoder.getMapSize();
+    REQUIRE(size.isValid() == true);
+    REQUIRE(size.get() == 1);
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == false);
@@ -969,6 +1006,21 @@ TEST_CASE( "DecodeMap_Mini_small", "" ) {
     char str[16];
     auto len = decoder.getString(str, sizeof(str));
     REQUIRE(len.isValid() == false);
+
+    {
+    auto value = decoder.getMapEntryByIndex(1, str, sizeof(str));
+    REQUIRE(value.isValid() == false);
+    }
+
+    {
+    auto value = decoder.getMapEntryByIndex(0, str, sizeof(str));
+    REQUIRE(value.isValid() == true);
+    REQUIRE(std::string(str) == "a");
+    auto strlen = value.getString(str, sizeof(str));
+    REQUIRE(strlen.isValid() == true);
+    REQUIRE(strlen.get() == 1);
+    REQUIRE(std::string(str) == "A");
+    }
 
     uint8_t bin[16];
     auto len2 = decoder.getBinary(bin, sizeof(bin));
@@ -998,6 +1050,10 @@ TEST_CASE( "DecodeMap_Mini_3Entries", "" ) {
         }};
 
     Decoder decoder(message.data(), message.size());
+
+    auto size = decoder.getMapSize();
+    REQUIRE(size.isValid() == true);
+    REQUIRE(size.get() == 3);
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == false);
@@ -1048,6 +1104,22 @@ TEST_CASE( "DecodeMap_Mini_3Entries", "" ) {
     REQUIRE(i.get() == 42);
     }
 
+
+    {
+    auto value = decoder.getMapEntryByIndex(3, str, sizeof(str));
+    REQUIRE(value.isValid() == false);
+    }
+
+    {
+    auto value = decoder.getMapEntryByIndex(2, str, sizeof(str));
+    REQUIRE(value.isValid() == true);
+    REQUIRE(std::string(str) == "sdf");
+    auto number = value.getUint8();
+    REQUIRE(number.isValid() == true);
+    REQUIRE(number.get() == 42);
+    }
+
+
     REQUIRE(decoder.isValid() == true);
 }
 
@@ -1063,6 +1135,10 @@ TEST_CASE( "DecodeMap_Big_4Entries", "" ) {
         }};
 
     Decoder decoder(message.data(), message.size());
+
+    auto size = decoder.getMapSize();
+    REQUIRE(size.isValid() == true);
+    REQUIRE(size.get() == 4);
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == false);
@@ -1119,6 +1195,20 @@ TEST_CASE( "DecodeMap_Big_4Entries", "" ) {
     REQUIRE(i.get() == 7);
     }
 
+    {
+    auto value = decoder.getMapEntryByIndex(4, str, sizeof(str));
+    REQUIRE(value.isValid() == false);
+    }
+
+    {
+    auto value = decoder.getMapEntryByIndex(3, str, sizeof(str));
+    REQUIRE(value.isValid() == true);
+    REQUIRE(std::string(str) == "sdf");
+    auto number = value.getUint8();
+    REQUIRE(number.isValid() == true);
+    REQUIRE(number.get() == 42);
+    }
+
     REQUIRE(decoder.isValid() == true);
 }
 
@@ -1128,6 +1218,9 @@ TEST_CASE( "DecodeArray_small_empty", "" ) {
         }};
 
     Decoder decoder(message.data(), message.size());
+
+    auto size = decoder.getMapSize();
+    REQUIRE(size.isValid() == false);
 
     auto u8 = decoder.getUint8();
     REQUIRE(u8.isValid() == false);
@@ -1492,6 +1585,24 @@ TEST_CASE( "DecodeArray_Big_ContainingMapsAndArrays", "" ) {
     REQUIRE(decoder["inti"].isValid() == false);
     REQUIRE(decoder["g"].isValid() == false);
     REQUIRE(decoder["gHa"].isValid() == false);
+
+    {
+    auto mapSize = decoder.accessArray(0).getMapSize();
+    REQUIRE(mapSize.isValid() == true);
+    REQUIRE(mapSize.get() == 4);
+    }
+
+    {
+    auto mapSize = decoder.accessArray(1).getMapSize();
+    REQUIRE(mapSize.isValid() == false);
+    }
+
+    {
+    // test again to make sure decoder state was not changed (seek etc.)
+    auto mapSize = decoder.accessArray(0).getMapSize();
+    REQUIRE(mapSize.isValid() == true);
+    REQUIRE(mapSize.get() == 4);
+    }
 
     {
     char mapStr[5];

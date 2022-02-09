@@ -59,6 +59,65 @@ void Decoder::seekElementByIndex(uint8_t f_index)
     return;
 }
 
+Decoder Decoder::getMapEntryByIndex(uint8_t f_index, char * f_out_key, uint8_t f_maxSize)
+{
+    Decoder newDecoder = *this;
+    newDecoder.seekMapEntryByIndex(f_index);
+    auto len = newDecoder.getString(f_out_key, f_maxSize);
+    if(not len.isValid())
+    {
+        newDecoder.m_validSeek = false;
+        return newDecoder;
+    }
+    newDecoder.seekNextElement();
+    return newDecoder;
+}
+
+void Decoder::seekMapEntryByIndex(uint8_t f_index)
+{
+    if(not m_validSeek)
+    {
+        return;
+    }
+
+    HeaderInfo header = decodeHeader();
+    if(header.headerType != HeaderInfo::Map)
+    {
+        m_validSeek = false;
+        return;
+    }
+
+    if(f_index >= header.numPayloadElements)
+    {
+        m_validSeek = false;
+        return;
+    }
+
+    m_position += header.headerSize;
+
+    for(uint16_t elementNumber = 0; elementNumber < f_index; elementNumber++)
+    {
+            seekNextElement();
+            seekNextElement();
+    }
+    return;
+}
+
+Maybe<uint8_t> Decoder::getMapSize() const
+{
+    if(not m_validSeek)
+    {
+        return Maybe<uint8_t>();
+    }
+
+    HeaderInfo header = decodeHeader();
+    if(header.headerType != HeaderInfo::Map)
+    {
+        return Maybe<uint8_t>();
+    }
+    return Maybe<uint8_t>(header.numPayloadElements);
+}
+
 void Decoder::seekElementByKey(const char * f_key)
 {
     if(not m_validSeek)
@@ -100,6 +159,7 @@ void Decoder::seekElementByKey(const char * f_key)
     m_validSeek = false;
     return;
 }
+
 void Decoder::seekNextElement()
 {
     HeaderInfo header = decodeHeader();
