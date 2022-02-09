@@ -269,6 +269,7 @@ TEST_CASE( "EncodeNumber_u32", "" ) {
 }
 
 TEST_CASE( "EncodeNumber_u64", "[!shouldfail]" ) {
+  // Failing as Encoder does not support uint64_t
   std::vector<uint8_t> message{{0xcf, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00}};
   uint64_t bignum = 4294967296;
   {
