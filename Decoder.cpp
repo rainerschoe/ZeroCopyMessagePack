@@ -118,6 +118,21 @@ Maybe<uint8_t> Decoder::getMapSize() const
     return Maybe<uint8_t>(header.numPayloadElements);
 }
 
+Maybe<uint8_t> Decoder::getArraySize() const
+{
+    if(not m_validSeek)
+    {
+        return Maybe<uint8_t>();
+    }
+
+    HeaderInfo header = decodeHeader();
+    if(header.headerType != HeaderInfo::Array)
+    {
+        return Maybe<uint8_t>();
+    }
+    return Maybe<uint8_t>(header.numPayloadElements);
+}
+
 void Decoder::seekElementByKey(const char * f_key)
 {
     if(not m_validSeek)

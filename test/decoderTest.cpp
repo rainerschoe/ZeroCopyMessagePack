@@ -1246,6 +1246,9 @@ TEST_CASE( "DecodeArray_small_empty", "" ) {
     REQUIRE(decoder.accessArray(0).isValid() == false);
     REQUIRE(decoder.accessArray(1).isValid() == false);
 
+    REQUIRE(decoder.getArraySize().isValid() == true);
+    REQUIRE(decoder.getArraySize().get() == 0);
+
     {
     auto i = decoder.accessArray(0).getUint8();
     REQUIRE(i.isValid() == false);
@@ -1286,6 +1289,10 @@ TEST_CASE( "DecodeArray_small_one", "" ) {
     REQUIRE(res.isValid() == false);
 
     REQUIRE(decoder["asd"].isValid() == false);
+
+    REQUIRE(decoder.getArraySize().isValid() == true);
+    REQUIRE(decoder.getArraySize().get() == 1);
+
     REQUIRE(decoder.accessArray(0).isValid() == true);
     REQUIRE(decoder.accessArray(1).isValid() == false);
 
@@ -1331,6 +1338,9 @@ TEST_CASE( "DecodeArray_small_three", "" ) {
 
     auto res = decoder.compareString("hello");
     REQUIRE(res.isValid() == false);
+
+    REQUIRE(decoder.getArraySize().isValid() == true);
+    REQUIRE(decoder.getArraySize().get() == 3);
 
     REQUIRE(decoder["asd"].isValid() == false);
     REQUIRE(decoder.accessArray(0).isValid() == true);
@@ -1396,6 +1406,9 @@ TEST_CASE( "DecodeArray_big_three", "" ) {
     REQUIRE(decoder.accessArray(1).isValid() == true);
     REQUIRE(decoder.accessArray(2).isValid() == true);
     REQUIRE(decoder.accessArray(3).isValid() == false);
+
+    REQUIRE(decoder.getArraySize().isValid() == true);
+    REQUIRE(decoder.getArraySize().get() == 3);
 
     {
     auto i = decoder.accessArray(0).getUint8();
@@ -1503,6 +1516,10 @@ TEST_CASE( "DecodeMap_Big_ContainingMapsAndArrays", "" ) {
     REQUIRE(i.isValid() == true);
     REQUIRE(i.get() == 7);
     }
+
+
+    REQUIRE(decoder["ym"].getArraySize().isValid() == true);
+    REQUIRE(decoder["ym"].getArraySize().get() == 3);
 
     {
     auto i = decoder["ym"].accessArray(0).getUint8();
