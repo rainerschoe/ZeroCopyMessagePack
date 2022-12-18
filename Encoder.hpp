@@ -29,6 +29,9 @@ class Encoder
         /// Encodes an unsigned integer into the buffer.
         bool addUint(uint32_t f_number);
 
+        // EXPERIMENTAL
+        bool addInt(int32_t f_number);
+
         /// Encodes a string into the buffer.
         /// f_string needs to be null terminated.
         bool addString(const char * f_string);

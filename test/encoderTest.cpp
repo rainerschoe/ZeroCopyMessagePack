@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+
+// some useful encoding examples to test against can be found here: https://github.com/kawanet/msgpack-test-suite/tree/master/src
+
 #include <catch2/catch_test_macros.hpp>
 #include <algorithm>
 #include <catch2/matchers/catch_matchers_string.hpp>
@@ -979,3 +982,38 @@ TEST_CASE( "EncodeMap_of_array", "" ) {
     REQUIRE(std::vector<uint8_t>(buf, buf+encoder.getMessageSize()) ==  message);
   }
 }
+
+TEST_CASE( "EncodeNumber_i32", "" ) {
+  {
+    uint8_t buf[5];
+    Encoder encoder(buf, sizeof(buf));
+
+    auto result = encoder.addInt(0);
+
+    REQUIRE(result == true);
+    REQUIRE(encoder.getMessageSize() == 5);
+    REQUIRE(std::vector<uint8_t>(buf, buf+encoder.getMessageSize()) == (std::vector<uint8_t>{{0xd2, 0x00, 0x00, 0x00, 0x00}}));
+  }
+  {
+    uint8_t buf[5];
+    Encoder encoder(buf, sizeof(buf));
+
+    auto result = encoder.addInt(-1);
+
+    REQUIRE(result == true);
+    REQUIRE(encoder.getMessageSize() == 5);
+    REQUIRE(std::vector<uint8_t>(buf, buf+encoder.getMessageSize()) == (std::vector<uint8_t>{{0xd2, 0xff, 0xff, 0xff, 0xff}}));
+  }
+  {
+    uint8_t buf[5];
+    Encoder encoder(buf, sizeof(buf));
+
+    auto result = encoder.addInt(-65536);
+
+    REQUIRE(result == true);
+    REQUIRE(encoder.getMessageSize() == 5);
+    REQUIRE(std::vector<uint8_t>(buf, buf+encoder.getMessageSize()) == (std::vector<uint8_t>{{0xd2, 0xff, 0xff, 0x00, 0x00}}));
+  }
+
+}
+

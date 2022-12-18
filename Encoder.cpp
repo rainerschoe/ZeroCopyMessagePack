@@ -23,6 +23,23 @@ Encoder::Encoder(uint8_t * f_out_borrow_messageBuffer, uint8_t f_bufferSize) :
 {
 }
 
+// FIXME: experimental, untested and inefficient:
+//        currently all values stored as 32bit signed int
+bool Encoder::addInt(int32_t f_number)
+{
+    if(sizeLeft() < 5)
+    {
+        return false;
+    }
+    m_messageBuffer[m_position] = 0xd2;
+    m_messageBuffer[m_position+1] = f_number>>24;
+    m_messageBuffer[m_position+2] = f_number>>16;
+    m_messageBuffer[m_position+3] = f_number>>8;
+    m_messageBuffer[m_position+4] = f_number;
+    m_position += 5;
+    return true;
+}
+
 bool Encoder::addUint(uint32_t f_number)
 {
     if(f_number <= 0x7f)
