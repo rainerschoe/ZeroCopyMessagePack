@@ -14,6 +14,9 @@
 
 #pragma once
 #include <inttypes.h>
+#include <cstring>
+#include <string.h>
+
 namespace ZCMessagePack
 {
 template<class T>
@@ -48,12 +51,12 @@ class GenericDecoder
 
     public:
         // Decoder(const uint8_t * f_borrow_messageBuffer, uint8_t f_messageSize) :
-        //     m_messageBuffer(f_borrow_messageBuffer),
+        //     readRawByte(f_borrow_messageBuffer),
         //     m_messageSize(f_messageSize)
         // {
         // }
 
-        Decoder(RawMessageReader f_raw_message_reader, uint8_t f_messageSize) :
+        GenericDecoder(RawMessageReader f_raw_message_reader, uint8_t f_messageSize) :
             m_raw_message_reader(f_raw_message_reader),
             m_messageSize(f_messageSize)
         {
@@ -63,13 +66,13 @@ class GenericDecoder
         /// The following functions navigate the message:
         
         /// Returns a new decoder which is seeked to the map value, matching given key.
-        /// Returned Decoder will refer to the map value (not the key).
-        Decoder operator[](const char * f_mapKey) const;
+        /// Returned GenericDecoder will refer to the map value (not the key).
+        GenericDecoder operator[](const char * f_mapKey) const;
 
         /// Returns a new decoder which is seeked to the given array index.
         /// If f_index is out of range, the decoder will become invalid.
         /// NOTE: cannot overload operator[] for array access as implicit conversion is performed from int literal to char * whcih makes it ambiguous
-        Decoder accessArray(uint8_t f_index) const;
+        GenericDecoder accessArray(uint8_t f_index) const;
 
         /// Resets decoder position to the message root element.
         /// This will recover from an invalid decoder state.
@@ -88,14 +91,14 @@ class GenericDecoder
 
         /// Retrive both the Key and the Value of a map entry at given index.
         /// @param f_index given index of the map entry. If out of range, an
-        ///                invalid Decoder is returned
+        ///                invalid GenericDecoder is returned
         /// @param f_out_key user-allocated buffer where the key string will be
         ///                  written to.
         ///                  If a string is written (Valid decoder returned)
         ///                  it is always null terminated.
         /// @param f_maxSize Maximum number of bytes to write to f_out_key
         ///                  (including null termination)
-        Decoder getMapEntryByIndex(uint8_t f_index, char * f_out_key, uint8_t f_maxSize);
+        GenericDecoder getMapEntryByIndex(uint8_t f_index, char * f_out_key, uint8_t f_maxSize);
 
         //---------------------------------------------------------------------
 
@@ -182,32 +185,33 @@ class GenericDecoder
         void seekNextElement();
 
         /// Set decoder position to map element with given index.
-        /// Only works if current seek position is at a map, otherwise Decoder
+        /// Only works if current seek position is at a map, otherwise GenericDecoder
         /// is set to invalid seek.
         /// After successful seek, key can be read first 
         void seekMapEntryByIndex(uint8_t f_index);
 
         RawMessageReader m_raw_message_reader;
-        //const uint8_t * m_messageBuffer;
+        //const uint8_t * readRawByte;
         uint8_t m_messageSize;
         uint8_t m_position = 0;
         uint8_t m_validSeek = true;
 };
 
+
 class MemoryReader
 {
     public:
     MemoryReader(const uint8_t * f_messageBuffer) :
-        m_messageBuffer(f_messageBuffer)
+        readRawByte(f_messageBuffer)
     {
     }
 
-    void read(uint8_t f_offset, uint8_t f_size, uint8_t * f_out_buffer )
+    void read(uint8_t f_offset, uint8_t f_size, uint8_t * f_out_buffer ) const
     {
-        memcpy(f_out_buffer, m_messageBuffer + f_offset, f_size);
+        std::memcpy(f_out_buffer, readRawByte + f_offset, f_size);
     }
     private:
-    const uint8_t * m_messageBuffer;
+    const uint8_t * readRawByte;
 };
 
 class Decoder : public GenericDecoder<MemoryReader>
@@ -219,4 +223,6 @@ class Decoder : public GenericDecoder<MemoryReader>
     }
 };
 
+
 }
+#include "Decoder_impl.hpp"
