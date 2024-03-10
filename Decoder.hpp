@@ -43,19 +43,8 @@ class Maybe
 template<class RawMessageReader>
 class GenericDecoder
 {
-    // class RawMessageReader
-    // {
-    //     public:
-    //     virtual void read(uint8_t f_offset, uint8_t f_size, uint8_t * f_out_buffer ) = 0;
-    // };
 
     public:
-        // Decoder(const uint8_t * f_borrow_messageBuffer, uint8_t f_messageSize) :
-        //     readRawByte(f_borrow_messageBuffer),
-        //     m_messageSize(f_messageSize)
-        // {
-        // }
-
         GenericDecoder(RawMessageReader f_raw_message_reader, uint8_t f_messageSize) :
             m_raw_message_reader(f_raw_message_reader),
             m_messageSize(f_messageSize)
@@ -223,6 +212,6 @@ class Decoder : public GenericDecoder<MemoryReader>
     }
 };
 
-
 }
+
 #include "Decoder_impl.hpp"
