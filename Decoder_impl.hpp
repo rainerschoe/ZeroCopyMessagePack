@@ -501,6 +501,32 @@ Maybe<uint16_t> GenericDecoder<T>::getBinary(uint8_t * f_out_data, uint8_t f_max
     return Maybe<uint16_t>(header.numPayloadElements);
 }
 
+template<class T>
+template<class Writer>
+Maybe<uint16_t> GenericDecoder<T>::getBinary(Writer & writer) const
+{
+    HeaderInfo header = decodeHeader();
+    if(
+            header.headerType != HeaderInfo::String
+            or
+            m_position + header.headerSize + header.numPayloadElements > m_messageSize
+      )
+    {
+        // type mismatch
+        return Maybe<uint16_t>();
+    }
+
+    for(uint16_t i = 0; i < header.numPayloadElements; i++)
+    {
+        bool success = writer.write(readRawByte(m_position + header.headerSize + i));
+        if(not success)
+        {
+            return Maybe<uint16_t>();
+        }
+    }
+    return Maybe<uint16_t>(header.numPayloadElements);
+}
+
 
 template<class T>
 bool GenericDecoder<T>::isValid()

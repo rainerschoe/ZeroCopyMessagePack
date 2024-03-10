@@ -149,6 +149,16 @@ class GenericDecoder
         /// @param f_out_data buffer to which data is written.
         /// @returns number of bytes read if read was successful
         Maybe<uint16_t> getBinary(uint8_t * f_out_data, uint8_t f_maxSize) const;
+
+        /// Reads a Byte buffer from the MessagePack at current seek position.
+        /// @param writer writer instance which will be used to write the binary data to.
+        ///               The writer must provide a write function with the following signature:
+        ///               bool write(uint8_t data)
+        ///               returning false if data could not be written
+        ///               it is called for every byte to write
+        /// @returns number of bytes read and written to writer if read was successful
+        template<class Writer>
+        Maybe<uint16_t> getBinary(Writer & writer) const;
         //---------------------------------------------------------------------
 
     private:
