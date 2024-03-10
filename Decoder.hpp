@@ -191,16 +191,16 @@ class MemoryReader
 {
     public:
     MemoryReader(const uint8_t * f_messageBuffer) :
-        readRawByte(f_messageBuffer)
+        buffer(f_messageBuffer)
     {
     }
 
     void read(uint8_t f_offset, uint8_t f_size, uint8_t * f_out_buffer ) const
     {
-        std::memcpy(f_out_buffer, readRawByte + f_offset, f_size);
+        std::memcpy(f_out_buffer, buffer + f_offset, f_size);
     }
     private:
-    const uint8_t * readRawByte;
+    const uint8_t * buffer;
 };
 
 class Decoder : public GenericDecoder<MemoryReader>
