@@ -45,6 +45,10 @@ class GenericDecoder
 {
 
     public:
+        // Constructs a new decoder that reads message data from the given message
+        // reader. The message reader must provide a read function with the following signature:
+        // void read(uint8_t f_offset, uint8_t f_size, uint8_t * f_out_buffer) const
+        // where f_offset is the offset in the message buffer, f_size is the number of bytes to read, f_out_buffer is the buffer to write the read data to.
         GenericDecoder(RawMessageReader f_raw_message_reader, uint8_t f_messageSize) :
             m_raw_message_reader(f_raw_message_reader),
             m_messageSize(f_messageSize)
@@ -180,12 +184,10 @@ class GenericDecoder
         void seekMapEntryByIndex(uint8_t f_index);
 
         RawMessageReader m_raw_message_reader;
-        //const uint8_t * readRawByte;
         uint8_t m_messageSize;
         uint8_t m_position = 0;
         uint8_t m_validSeek = true;
 };
-
 
 class MemoryReader
 {
@@ -203,6 +205,7 @@ class MemoryReader
     const uint8_t * buffer;
 };
 
+/// Convenience class for a decoder that reads from a memory buffer
 class Decoder : public GenericDecoder<MemoryReader>
 {
     public:
