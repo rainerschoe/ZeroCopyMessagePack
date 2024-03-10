@@ -197,7 +197,7 @@ class GenericDecoder
 class MemoryReader
 {
     public:
-    MemoryReader(const uint8_t * f_messageBuffer, uint8_t f_messageSize) :
+    MemoryReader(const uint8_t * f_messageBuffer) :
         m_messageBuffer(f_messageBuffer)
     {
     }
@@ -214,7 +214,7 @@ class Decoder : public GenericDecoder<MemoryReader>
 {
     public:
     Decoder(const uint8_t * f_borrow_messageBuffer, uint8_t f_messageSize) :
-        GenericDecoder<MemoryReader>(MemoryReader(f_borrow_messageBuffer, f_messageSize), f_messageSize)
+        GenericDecoder<MemoryReader>(MemoryReader(f_borrow_messageBuffer), f_messageSize)
     {
     }
 };
