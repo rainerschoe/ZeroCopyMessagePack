@@ -37,15 +37,27 @@ class Maybe
     T m_value;
 };
 
-class Decoder
+template<class RawMessageReader>
+class GenericDecoder
 {
+    // class RawMessageReader
+    // {
+    //     public:
+    //     virtual void read(uint8_t f_offset, uint8_t f_size, uint8_t * f_out_buffer ) = 0;
+    // };
+
     public:
-        Decoder(const uint8_t * f_borrow_messageBuffer, uint8_t f_messageSize) :
-            m_messageBuffer(f_borrow_messageBuffer),
+        // Decoder(const uint8_t * f_borrow_messageBuffer, uint8_t f_messageSize) :
+        //     m_messageBuffer(f_borrow_messageBuffer),
+        //     m_messageSize(f_messageSize)
+        // {
+        // }
+
+        Decoder(RawMessageReader f_raw_message_reader, uint8_t f_messageSize) :
+            m_raw_message_reader(f_raw_message_reader),
             m_messageSize(f_messageSize)
         {
         }
-
 
         //---------------------------------------------------------------------
         /// The following functions navigate the message:
@@ -165,6 +177,8 @@ class Decoder
 
         HeaderInfo decodeHeader() const;
 
+        uint8_t readRawByte(uint8_t offset) const;
+
         void seekNextElement();
 
         /// Set decoder position to map element with given index.
@@ -173,9 +187,36 @@ class Decoder
         /// After successful seek, key can be read first 
         void seekMapEntryByIndex(uint8_t f_index);
 
-        const uint8_t * m_messageBuffer;
+        RawMessageReader m_raw_message_reader;
+        //const uint8_t * m_messageBuffer;
         uint8_t m_messageSize;
         uint8_t m_position = 0;
         uint8_t m_validSeek = true;
 };
+
+class MemoryReader
+{
+    public:
+    MemoryReader(const uint8_t * f_messageBuffer, uint8_t f_messageSize) :
+        m_messageBuffer(f_messageBuffer)
+    {
+    }
+
+    void read(uint8_t f_offset, uint8_t f_size, uint8_t * f_out_buffer )
+    {
+        memcpy(f_out_buffer, m_messageBuffer + f_offset, f_size);
+    }
+    private:
+    const uint8_t * m_messageBuffer;
+};
+
+class Decoder : public GenericDecoder<MemoryReader>
+{
+    public:
+    Decoder(const uint8_t * f_borrow_messageBuffer, uint8_t f_messageSize) :
+        GenericDecoder<MemoryReader>(MemoryReader(f_borrow_messageBuffer, f_messageSize), f_messageSize)
+    {
+    }
+};
+
 }

@@ -491,3 +491,10 @@ bool Decoder::isValid()
     return m_validSeek;
 }
 }
+
+uint8_t ZCMessagePack::Decoder::readRawByte(uint8_t offset) const
+{
+    uint8_t result;
+    m_raw_message_reader.read(offset, 1, &result);
+    return result
+}
