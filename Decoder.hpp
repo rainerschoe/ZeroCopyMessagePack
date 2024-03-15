@@ -40,6 +40,23 @@ class Maybe
     T m_value;
 };
 
+
+class MemoryReader
+{
+    public:
+    MemoryReader(const uint8_t * f_messageBuffer) :
+        buffer(f_messageBuffer)
+    {
+    }
+
+    void read(uint8_t f_offset, uint8_t f_size, uint8_t * f_out_buffer ) const
+    {
+        std::memcpy(f_out_buffer, buffer + f_offset, f_size);
+    }
+    private:
+    const uint8_t * buffer;
+};
+
 template<class RawMessageReader>
 class GenericDecoder
 {
@@ -55,6 +72,12 @@ class GenericDecoder
         {
         }
 
+        // Constructs a non-Generic Decoder using MemoryReader as the RawMessageReader.
+        template<typename U = RawMessageReader>
+        GenericDecoder(const uint8_t * f_borrow_messageBuffer, uint8_t f_messageSize, typename std::enable_if<std::is_same<U, MemoryReader>::value>::type* = 0) :
+            m_raw_message_reader(MemoryReader(f_borrow_messageBuffer)), m_messageSize(f_messageSize)
+        {
+        }
         //---------------------------------------------------------------------
         /// The following functions navigate the message:
         
@@ -199,31 +222,10 @@ class GenericDecoder
         uint8_t m_validSeek = true;
 };
 
-class MemoryReader
-{
-    public:
-    MemoryReader(const uint8_t * f_messageBuffer) :
-        buffer(f_messageBuffer)
-    {
-    }
+// Convenience typedef for a non-Generic Decoder using MemoryReader as the RawMessageReader.
+// You can use the special constructor to create a non-Generic Decoder using MemoryReader as the RawMessageReader.
+using Decoder = GenericDecoder<MemoryReader>;
 
-    void read(uint8_t f_offset, uint8_t f_size, uint8_t * f_out_buffer ) const
-    {
-        std::memcpy(f_out_buffer, buffer + f_offset, f_size);
-    }
-    private:
-    const uint8_t * buffer;
-};
-
-/// Convenience class for a decoder that reads from a memory buffer
-class Decoder : public GenericDecoder<MemoryReader>
-{
-    public:
-    Decoder(const uint8_t * f_borrow_messageBuffer, uint8_t f_messageSize) :
-        GenericDecoder<MemoryReader>(MemoryReader(f_borrow_messageBuffer), f_messageSize)
-    {
-    }
-};
 
 }
 
