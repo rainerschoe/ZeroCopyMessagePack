@@ -12,26 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "Decoder.hpp"
+#pragma once
+#include <inttypes.h>
+#include <cstring>
 #include <string.h>
+#include "Decoder.hpp"
 
 namespace ZCMessagePack
 {
-Decoder Decoder::operator[](const char * f_mapKey) const
+template<class T>
+GenericDecoder<T> GenericDecoder<T>::operator[](const char * f_mapKey) const
 {
-    Decoder newDecoder = *this;
-    newDecoder.seekElementByKey(f_mapKey);
-    return newDecoder;
+    GenericDecoder newGenericDecoder = *this;
+    newGenericDecoder.seekElementByKey(f_mapKey);
+    return newGenericDecoder;
 }
 
-Decoder Decoder::accessArray(uint8_t f_index) const
+template<class T>
+GenericDecoder<T> GenericDecoder<T>::accessArray(uint8_t f_index) const
 {
-    Decoder newDecoder = *this;
-    newDecoder.seekElementByIndex(f_index);
-    return newDecoder;
+    GenericDecoder<T> newGenericDecoder = *this;
+    newGenericDecoder.seekElementByIndex(f_index);
+    return newGenericDecoder;
 }
 
-void Decoder::seekElementByIndex(uint8_t f_index)
+template<class T>
+void GenericDecoder<T>::seekElementByIndex(uint8_t f_index)
 {
     if(not m_validSeek)
     {
@@ -59,21 +65,23 @@ void Decoder::seekElementByIndex(uint8_t f_index)
     return;
 }
 
-Decoder Decoder::getMapEntryByIndex(uint8_t f_index, char * f_out_key, uint8_t f_maxSize)
+template<class T>
+GenericDecoder<T> GenericDecoder<T>::getMapEntryByIndex(uint8_t f_index, char * f_out_key, uint8_t f_maxSize)
 {
-    Decoder newDecoder = *this;
-    newDecoder.seekMapEntryByIndex(f_index);
-    auto len = newDecoder.getString(f_out_key, f_maxSize);
+    GenericDecoder<T> newGenericDecoder = *this;
+    newGenericDecoder.seekMapEntryByIndex(f_index);
+    auto len = newGenericDecoder.getString(f_out_key, f_maxSize);
     if(not len.isValid())
     {
-        newDecoder.m_validSeek = false;
-        return newDecoder;
+        newGenericDecoder.m_validSeek = false;
+        return newGenericDecoder;
     }
-    newDecoder.seekNextElement();
-    return newDecoder;
+    newGenericDecoder.seekNextElement();
+    return newGenericDecoder;
 }
 
-void Decoder::seekMapEntryByIndex(uint8_t f_index)
+template<class T>
+void GenericDecoder<T>::seekMapEntryByIndex(uint8_t f_index)
 {
     if(not m_validSeek)
     {
@@ -103,7 +111,8 @@ void Decoder::seekMapEntryByIndex(uint8_t f_index)
     return;
 }
 
-Maybe<uint8_t> Decoder::getMapSize() const
+template<class T>
+Maybe<uint8_t> GenericDecoder<T>::getMapSize() const
 {
     if(not m_validSeek)
     {
@@ -118,7 +127,8 @@ Maybe<uint8_t> Decoder::getMapSize() const
     return Maybe<uint8_t>(header.numPayloadElements);
 }
 
-Maybe<uint8_t> Decoder::getArraySize() const
+template<class T>
+Maybe<uint8_t> GenericDecoder<T>::getArraySize() const
 {
     if(not m_validSeek)
     {
@@ -133,7 +143,8 @@ Maybe<uint8_t> Decoder::getArraySize() const
     return Maybe<uint8_t>(header.numPayloadElements);
 }
 
-void Decoder::seekElementByKey(const char * f_key)
+template<class T>
+void GenericDecoder<T>::seekElementByKey(const char * f_key)
 {
     if(not m_validSeek)
     {
@@ -175,7 +186,8 @@ void Decoder::seekElementByKey(const char * f_key)
     return;
 }
 
-void Decoder::seekNextElement()
+template<class T>
+void GenericDecoder<T>::seekNextElement()
 {
     HeaderInfo header = decodeHeader();
     switch(header.headerType)
@@ -210,14 +222,15 @@ void Decoder::seekNextElement()
 }
 
 
-Decoder::HeaderInfo Decoder::decodeHeader() const
+template<class T>
+typename GenericDecoder<T>::HeaderInfo GenericDecoder<T>::decodeHeader() const
 {
     HeaderInfo newHeaderInfo;
     if(m_position >= m_messageSize)
     {
         return newHeaderInfo;
     }
-    uint8_t typeCode = m_messageBuffer[m_position];
+    uint8_t typeCode = readRawByte(m_position);
 
     newHeaderInfo.headerSize = 1;
     newHeaderInfo.numPayloadElements = 0;
@@ -298,7 +311,7 @@ Decoder::HeaderInfo Decoder::decodeHeader() const
             }
             newHeaderInfo.headerType = HeaderInfo::String;
             newHeaderInfo.headerSize = 2;
-            newHeaderInfo.numPayloadElements = m_messageBuffer[m_position + 1];
+            newHeaderInfo.numPayloadElements = readRawByte(m_position + 1);
             return newHeaderInfo;
         case 0xdc:
             if(m_messageSize - m_position < 3)
@@ -307,7 +320,7 @@ Decoder::HeaderInfo Decoder::decodeHeader() const
             }
             newHeaderInfo.headerType = HeaderInfo::Array;
             newHeaderInfo.headerSize = 3;
-            newHeaderInfo.numPayloadElements = (static_cast<uint16_t>(m_messageBuffer[m_position + 1]) << 8) | m_messageBuffer[m_position + 2];
+            newHeaderInfo.numPayloadElements = (static_cast<uint16_t>(readRawByte(m_position + 1)) << 8) | readRawByte(m_position + 2);
             return newHeaderInfo;
         case 0xde:
             if(m_messageSize - m_position < 3)
@@ -316,7 +329,7 @@ Decoder::HeaderInfo Decoder::decodeHeader() const
             }
             newHeaderInfo.headerType = HeaderInfo::Map;
             newHeaderInfo.headerSize = 3;
-            newHeaderInfo.numPayloadElements = (static_cast<uint16_t>(m_messageBuffer[m_position + 1]) << 8) | m_messageBuffer[m_position + 2];
+            newHeaderInfo.numPayloadElements = (static_cast<uint16_t>(readRawByte(m_position + 1)) << 8) | readRawByte(m_position + 2);
             return newHeaderInfo;
     }
 
@@ -324,7 +337,8 @@ Decoder::HeaderInfo Decoder::decodeHeader() const
 }
 
 
-Maybe<bool> Decoder::isNil() const
+template<class T>
+Maybe<bool> GenericDecoder<T>::isNil() const
 {
     HeaderInfo header = decodeHeader();
     if(header.headerType == HeaderInfo::Nil)
@@ -342,7 +356,8 @@ Maybe<bool> Decoder::isNil() const
     }
 }
 
-Maybe<bool> Decoder::getBool() const
+template<class T>
+Maybe<bool> GenericDecoder<T>::getBool() const
 {
     HeaderInfo header = decodeHeader();
     if(header.headerType == HeaderInfo::True)
@@ -360,7 +375,8 @@ Maybe<bool> Decoder::getBool() const
     }
 }
 
-Maybe<uint32_t> Decoder::getUint32() const
+template<class T>
+Maybe<uint32_t> GenericDecoder<T>::getUint32() const
 {
     HeaderInfo header = decodeHeader();
     if(
@@ -375,20 +391,21 @@ Maybe<uint32_t> Decoder::getUint32() const
     switch(header.numPayloadElements)
     {
         case 0:
-            return Maybe<uint32_t>(m_messageBuffer[m_position] & 0x7f);
+            return Maybe<uint32_t>(readRawByte(m_position) & 0x7f);
         case 1:
-            return Maybe<uint32_t>(m_messageBuffer[m_position + 1]);
+            return Maybe<uint32_t>(readRawByte(m_position + 1));
         case 2:
-            return Maybe<uint32_t>(static_cast<uint32_t>(m_messageBuffer[m_position + 1]) << 8 | m_messageBuffer[m_position + 2]);
+            return Maybe<uint32_t>(static_cast<uint32_t>(readRawByte(m_position + 1)) << 8 | readRawByte(m_position + 2));
         case 4:
-            return Maybe<uint32_t>(static_cast<uint32_t>(m_messageBuffer[m_position + 1]) << 24 | static_cast<uint32_t>(m_messageBuffer[m_position + 2]) << 16 | static_cast<uint32_t>(m_messageBuffer[m_position + 3]) << 8 | m_messageBuffer[m_position + 4]);
+            return Maybe<uint32_t>(static_cast<uint32_t>(readRawByte(m_position + 1)) << 24 | static_cast<uint32_t>(readRawByte(m_position + 2)) << 16 | static_cast<uint32_t>(readRawByte(m_position + 3)) << 8 | readRawByte(m_position + 4));
         default:
             // number too big
             return Maybe<uint32_t>();
     }
 }
 
-Maybe<uint8_t> Decoder::getUint8() const
+template<class T>
+Maybe<uint8_t> GenericDecoder<T>::getUint8() const
 {
     auto u32val = getUint32();
     if((not u32val.isValid()) or u32val.get() > 0xff)
@@ -401,7 +418,8 @@ Maybe<uint8_t> Decoder::getUint8() const
     }
 }
 
-Maybe<uint16_t> Decoder::getUint16() const
+template<class T>
+Maybe<uint16_t> GenericDecoder<T>::getUint16() const
 {
     auto u32val = getUint32();
     if((not u32val.isValid()) or u32val.get() > 0xffff)
@@ -414,7 +432,8 @@ Maybe<uint16_t> Decoder::getUint16() const
     }
 }
 
-Maybe<uint16_t> Decoder::getString(char * f_out_data, uint8_t f_maxSize) const
+template<class T>
+Maybe<uint16_t> GenericDecoder<T>::getString(char * f_out_data, uint8_t f_maxSize) const
 {
     if(f_maxSize < 1)
     {
@@ -432,7 +451,8 @@ Maybe<uint16_t> Decoder::getString(char * f_out_data, uint8_t f_maxSize) const
     return numBytes;
 }
 
-Maybe<bool> Decoder::compareString(const char * f_string) const
+template<class T>
+Maybe<bool> GenericDecoder<T>::compareString(const char * f_string) const
 {
     HeaderInfo header = decodeHeader();
     if(
@@ -445,11 +465,11 @@ Maybe<bool> Decoder::compareString(const char * f_string) const
         return Maybe<bool>();
     }
 
-    const char * message = reinterpret_cast<const char*>(&m_messageBuffer[m_position + header.headerSize]);
     size_t i = 0;
     for(; i < header.numPayloadElements; i++)
     {
-        if(f_string[i] == '\0' or message[i] != f_string[i])
+        char stored_char = static_cast<char>(readRawByte(m_position + header.headerSize + i));
+        if(f_string[i] == '\0' or stored_char != f_string[i])
         {
             return Maybe<bool>(false);
         }
@@ -461,7 +481,8 @@ Maybe<bool> Decoder::compareString(const char * f_string) const
     return Maybe<bool>(true);
 }
 
-Maybe<uint16_t> Decoder::getBinary(uint8_t * f_out_data, uint8_t f_maxSize) const
+template<class T>
+Maybe<uint16_t> GenericDecoder<T>::getBinary(uint8_t * f_out_data, uint8_t f_maxSize) const
 {
     HeaderInfo header = decodeHeader();
     if(
@@ -476,12 +497,39 @@ Maybe<uint16_t> Decoder::getBinary(uint8_t * f_out_data, uint8_t f_maxSize) cons
         return Maybe<uint16_t>();
     }
 
-    memcpy(f_out_data, &m_messageBuffer[m_position + header.headerSize], header.numPayloadElements);
+    m_raw_message_reader.read(m_position + header.headerSize, header.numPayloadElements, f_out_data);
+    return Maybe<uint16_t>(header.numPayloadElements);
+}
+
+template<class T>
+template<class Writer>
+Maybe<uint16_t> GenericDecoder<T>::getBinary(Writer & writer) const
+{
+    HeaderInfo header = decodeHeader();
+    if(
+            header.headerType != HeaderInfo::String
+            or
+            m_position + header.headerSize + header.numPayloadElements > m_messageSize
+      )
+    {
+        // type mismatch
+        return Maybe<uint16_t>();
+    }
+
+    for(uint16_t i = 0; i < header.numPayloadElements; i++)
+    {
+        bool success = writer.write(readRawByte(m_position + header.headerSize + i));
+        if(not success)
+        {
+            return Maybe<uint16_t>();
+        }
+    }
     return Maybe<uint16_t>(header.numPayloadElements);
 }
 
 
-bool Decoder::isValid()
+template<class T>
+bool GenericDecoder<T>::isValid()
 {
     auto header = decodeHeader();
     if(header.headerType == HeaderInfo::InvalidHeader)
@@ -490,4 +538,13 @@ bool Decoder::isValid()
     }
     return m_validSeek;
 }
+
+template<class T>
+uint8_t ZCMessagePack::GenericDecoder<T>::readRawByte(uint8_t offset) const
+{
+    uint8_t result;
+    m_raw_message_reader.read(offset, 1, &result);
+    return result;
+}
+
 }

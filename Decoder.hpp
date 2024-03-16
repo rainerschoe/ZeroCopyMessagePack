@@ -14,6 +14,9 @@
 
 #pragma once
 #include <inttypes.h>
+#include <cstring>
+#include <string.h>
+
 namespace ZCMessagePack
 {
 template<class T>
@@ -37,27 +40,55 @@ class Maybe
     T m_value;
 };
 
-class Decoder
+
+class MemoryReader
 {
     public:
-        Decoder(const uint8_t * f_borrow_messageBuffer, uint8_t f_messageSize) :
-            m_messageBuffer(f_borrow_messageBuffer),
+    MemoryReader(const uint8_t * f_messageBuffer) :
+        buffer(f_messageBuffer)
+    {
+    }
+
+    void read(uint8_t f_offset, uint8_t f_size, uint8_t * f_out_buffer ) const
+    {
+        std::memcpy(f_out_buffer, buffer + f_offset, f_size);
+    }
+    private:
+    const uint8_t * buffer;
+};
+
+template<class RawMessageReader>
+class GenericDecoder
+{
+
+    public:
+        // Constructs a new decoder that reads message data from the given message
+        // reader. The message reader must provide a read function with the following signature:
+        // void read(uint8_t f_offset, uint8_t f_size, uint8_t * f_out_buffer) const
+        // where f_offset is the offset in the message buffer, f_size is the number of bytes to read, f_out_buffer is the buffer to write the read data to.
+        GenericDecoder(RawMessageReader f_raw_message_reader, uint8_t f_messageSize) :
+            m_raw_message_reader(f_raw_message_reader),
             m_messageSize(f_messageSize)
         {
         }
 
-
+        // Constructs a non-Generic Decoder using MemoryReader as the RawMessageReader.
+        template<typename U = RawMessageReader>
+        GenericDecoder(const uint8_t * f_borrow_messageBuffer, uint8_t f_messageSize, typename std::enable_if<std::is_same<U, MemoryReader>::value>::type* = 0) :
+            m_raw_message_reader(MemoryReader(f_borrow_messageBuffer)), m_messageSize(f_messageSize)
+        {
+        }
         //---------------------------------------------------------------------
         /// The following functions navigate the message:
         
         /// Returns a new decoder which is seeked to the map value, matching given key.
-        /// Returned Decoder will refer to the map value (not the key).
-        Decoder operator[](const char * f_mapKey) const;
+        /// Returned GenericDecoder will refer to the map value (not the key).
+        GenericDecoder operator[](const char * f_mapKey) const;
 
         /// Returns a new decoder which is seeked to the given array index.
         /// If f_index is out of range, the decoder will become invalid.
         /// NOTE: cannot overload operator[] for array access as implicit conversion is performed from int literal to char * whcih makes it ambiguous
-        Decoder accessArray(uint8_t f_index) const;
+        GenericDecoder accessArray(uint8_t f_index) const;
 
         /// Resets decoder position to the message root element.
         /// This will recover from an invalid decoder state.
@@ -76,14 +107,14 @@ class Decoder
 
         /// Retrive both the Key and the Value of a map entry at given index.
         /// @param f_index given index of the map entry. If out of range, an
-        ///                invalid Decoder is returned
+        ///                invalid GenericDecoder is returned
         /// @param f_out_key user-allocated buffer where the key string will be
         ///                  written to.
         ///                  If a string is written (Valid decoder returned)
         ///                  it is always null terminated.
         /// @param f_maxSize Maximum number of bytes to write to f_out_key
         ///                  (including null termination)
-        Decoder getMapEntryByIndex(uint8_t f_index, char * f_out_key, uint8_t f_maxSize);
+        GenericDecoder getMapEntryByIndex(uint8_t f_index, char * f_out_key, uint8_t f_maxSize);
 
         //---------------------------------------------------------------------
 
@@ -141,6 +172,16 @@ class Decoder
         /// @param f_out_data buffer to which data is written.
         /// @returns number of bytes read if read was successful
         Maybe<uint16_t> getBinary(uint8_t * f_out_data, uint8_t f_maxSize) const;
+
+        /// Reads a Byte buffer from the MessagePack at current seek position.
+        /// @param writer writer instance which will be used to write the binary data to.
+        ///               The writer must provide a write function with the following signature:
+        ///               bool write(uint8_t data)
+        ///               returning false if data could not be written
+        ///               it is called for every byte to write
+        /// @returns number of bytes read and written to writer if read was successful
+        template<class Writer>
+        Maybe<uint16_t> getBinary(Writer & writer) const;
         //---------------------------------------------------------------------
 
     private:
@@ -165,17 +206,27 @@ class Decoder
 
         HeaderInfo decodeHeader() const;
 
+        uint8_t readRawByte(uint8_t offset) const;
+
         void seekNextElement();
 
         /// Set decoder position to map element with given index.
-        /// Only works if current seek position is at a map, otherwise Decoder
+        /// Only works if current seek position is at a map, otherwise GenericDecoder
         /// is set to invalid seek.
         /// After successful seek, key can be read first 
         void seekMapEntryByIndex(uint8_t f_index);
 
-        const uint8_t * m_messageBuffer;
+        RawMessageReader m_raw_message_reader;
         uint8_t m_messageSize;
         uint8_t m_position = 0;
         uint8_t m_validSeek = true;
 };
+
+// Convenience typedef for a non-Generic Decoder using MemoryReader as the RawMessageReader.
+// You can use the special constructor to create a non-Generic Decoder using MemoryReader as the RawMessageReader.
+using Decoder = GenericDecoder<MemoryReader>;
+
+
 }
+
+#include "Decoder_impl.hpp"
